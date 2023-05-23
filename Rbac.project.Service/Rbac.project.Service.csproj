@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rbac.project.IRepoistory\Rbac.project.IRepoistory.csproj" />
+    <ProjectReference Include="..\Rbac.project.IService\Rbac.project.IService.csproj" />
+  </ItemGroup>
+
+</Project>
