@@ -51,6 +51,7 @@ namespace Rbac.project.WebAPI
         // 此方法由运行时调用。使用此方法配置HTTP请求管道。
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors(m=>m.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

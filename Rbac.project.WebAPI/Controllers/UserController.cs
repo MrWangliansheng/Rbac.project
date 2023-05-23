@@ -23,10 +23,10 @@ namespace Rbac.project.WebAPI.Controllers
         /// <param name="name"></param>
         /// <param name="pwd"></param>
         /// <returns></returns>
-        [HttpGet("UserLog")]
-        public async Task<ResultDto> UserLog(string name, string pwd)
+        [HttpPost("UserLog")]
+        public async Task<ResultDto> UserLog(UserDto dto)
         {
-            var user = bll.UserLog(name, pwd);
+            var user = bll.UserLog(dto.name, dto.pwd);
             return await user;
         }
         /// <summary>
