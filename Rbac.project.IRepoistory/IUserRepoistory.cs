@@ -9,6 +9,6 @@ namespace Rbac.project.IRepoistory
 {
     public interface IUserRepoistory:IBaseRepoistory<User>
     {
-        Task<User> LogUser(string name, string pwd);
+        Task<User> LogUser(string name);
     }
 }

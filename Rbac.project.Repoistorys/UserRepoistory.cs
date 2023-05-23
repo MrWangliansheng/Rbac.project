@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Rbac.project.Domain;
 using Rbac.project.IRepoistory;
+using Rbac.project.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,17 +10,19 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.Repoistorys
 {
-    public class UserRepoistory : IUserRepoistory
+    public class UserRepoistory : BaseRepoistory<User>, IUserRepoistory
     {
-        public readonly RbacDbContext db;
-        public UserRepoistory(RbacDbContext db)
+        private readonly RbacDbContext db;
+        public UserRepoistory(RbacDbContext db) : base(db)
         {
-            this.db = db;
+            this.db=db;
         }
-        public async Task<User> LogUser(string name, string pwd)
+
+        public async Task<User> LogUser(string name)
         {
-            var user = db.User.Where(m => m.UserName.Equals(name) & m.UserPwaword.Equals(pwd)).FirstOrDefaultAsync();
-            return await user;
+            var user =await db.User.Where(m => m.UserName.Equals(name)).FirstOrDefaultAsync();
+           
+            return  user;
         }
     }
 }
