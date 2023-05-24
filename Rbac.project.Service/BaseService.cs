@@ -13,6 +13,12 @@ namespace Rbac.project.Service
         {
             this.Idal = Idal;
         }
+
+        public async Task<T> FindAsync(int id)
+        {
+           return await Idal.FindAsync(id);
+        }
+
         public Task<List<T>> GetALL()
         {
             var list =Idal.GetALL();
@@ -24,9 +30,11 @@ namespace Rbac.project.Service
             throw new NotImplementedException();
         }
 
-        public Task<int> InsertAsync(T t)
+        public async Task<T> InsertAsync(T t)
         {
-            throw new NotImplementedException();
+            return await Idal.InsertAsync(t);
         }
+
+
     }
 }

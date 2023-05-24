@@ -21,7 +21,7 @@ namespace Rbac.project.Domain
         /// 用户密码
         /// </summary>
         [StringLength (50)]
-        public string UserPwaword { get; set; }
+        public string UserPassword { get; set; }
         /// <summary>
         /// 用户邮箱
         /// </summary>
@@ -31,5 +31,19 @@ namespace Rbac.project.Domain
         /// 用户注册日期
         /// </summary>
         public DateTime UserCreateTime { get; set; }
+        /// <summary>
+        /// 用户名全称
+        /// </summary>
+        [StringLength(50)]
+        public string PullName { get; set; }
+        /// <summary>        
+        ///末次登录时间
+        /// </summary>
+        public DateTime? LastLoginTime { get; set; }
+        /// <summary>        
+        ///末次登录IP
+        /// </summary>
+        [StringLength(100)]
+        public string LastLoginIP { get; set; }
     }
 }

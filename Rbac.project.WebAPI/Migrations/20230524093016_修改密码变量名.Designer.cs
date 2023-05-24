@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rbac.project.Repoistorys;
 
 namespace Rbac.project.WebAPI.Migrations
 {
     [DbContext(typeof(RbacDbContext))]
-    partial class RbacDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230524093016_修改密码变量名")]
+    partial class 修改密码变量名
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

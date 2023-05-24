@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rbac.project.Repoistorys;
 
 namespace Rbac.project.WebAPI.Migrations
 {
     [DbContext(typeof(RbacDbContext))]
-    partial class RbacDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230524090506_用户最后登录日期可为空")]
+    partial class 用户最后登录日期可为空
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,7 +173,7 @@ namespace Rbac.project.WebAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("UserPassword")
+                    b.Property<string>("UserPwaword")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 

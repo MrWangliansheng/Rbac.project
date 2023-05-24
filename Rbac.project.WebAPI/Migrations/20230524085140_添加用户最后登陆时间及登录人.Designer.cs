@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rbac.project.Repoistorys;
 
 namespace Rbac.project.WebAPI.Migrations
 {
     [DbContext(typeof(RbacDbContext))]
-    partial class RbacDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230524085140_添加用户最后登陆时间及登录人")]
+    partial class 添加用户最后登陆时间及登录人
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -132,7 +134,7 @@ namespace Rbac.project.WebAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("LastLoginTime")
+                    b.Property<DateTime>("LastLoginTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("MegDeleteUser")
@@ -171,7 +173,7 @@ namespace Rbac.project.WebAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("UserPassword")
+                    b.Property<string>("UserPwaword")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 

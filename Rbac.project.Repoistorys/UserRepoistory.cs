@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rbac.project.Utility;
+using System.Security.Cryptography;
 
 namespace Rbac.project.Repoistorys
 {
@@ -17,7 +19,6 @@ namespace Rbac.project.Repoistorys
         {
             this.db=db;
         }
-
         public async Task<User> LogUser(string name)
         {
             var user =await db.User.Where(m => m.UserName.Equals(name)).FirstOrDefaultAsync();

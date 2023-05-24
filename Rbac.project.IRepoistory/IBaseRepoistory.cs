@@ -12,5 +12,7 @@ namespace Rbac.project.IRepoistory
 
         T Insert(T t);
 
+        Task<T> FindAsync(int id);
+
     }
 }

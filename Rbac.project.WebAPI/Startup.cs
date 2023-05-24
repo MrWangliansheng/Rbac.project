@@ -38,6 +38,15 @@ namespace Rbac.project.WebAPI
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rbac.project.WebAPI", Version = "v1" });
             });
 
+            services.AddCors(m =>
+            {
+                m.AddPolicy("cors", op => op
+                .WithOrigins("http://localhost:8082")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .WithExposedHeaders("X-Pagination"));
+            });
+
             services.AddDbContext<RbacDbContext>(m => m.UseSqlServer(Configuration.GetConnectionString("ConStr"), m => m.MigrationsAssembly("Rbac.project.WebAPI")));
 
             services.AddScoped(typeof(IBaseRepoistory<>), typeof(BaseRepoistory<>));
@@ -51,7 +60,7 @@ namespace Rbac.project.WebAPI
         // 此方法由运行时调用。使用此方法配置HTTP请求管道。
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors(m=>m.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
+            app.UseCors("cors");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

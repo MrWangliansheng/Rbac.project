@@ -16,6 +16,12 @@ namespace Rbac.project.Repoistorys
         {
             this.db = db;
         }
+
+        public async Task<T> FindAsync(int id)
+        {
+            return await db.Set<T>().FindAsync(id);
+        }
+
         /// <summary>
         /// 查询所有数据
         /// </summary>
@@ -43,7 +49,7 @@ namespace Rbac.project.Repoistorys
         /// <param name="t"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<T> InsertAsync(T t)
+        public virtual async Task<T> InsertAsync(T t)
         {
             await db.Set<T>().AddAsync(t);
             await db.SaveChangesAsync();

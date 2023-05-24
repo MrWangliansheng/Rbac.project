@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rbac.project.Domain;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,9 +9,11 @@ namespace Rbac.project.IService
     {
         Task<List<T>> GetALL();
 
-        Task<int> InsertAsync(T t);
+        Task<T> InsertAsync(T t);
 
         int Insert(T t);
+
+        Task<T> FindAsync(int id);
 
     }
 }

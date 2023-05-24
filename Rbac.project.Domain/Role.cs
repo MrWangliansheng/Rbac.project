@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,7 @@ namespace Rbac.project.Domain
         /// <summary>
         /// 角色名称
         /// </summary>
+        [StringLength(50)]
         public string RoleName { get; set; }
         /// <summary>
         /// 角色添加日期

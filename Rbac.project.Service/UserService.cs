@@ -47,7 +47,7 @@ namespace Rbac.project.Service
             var user = await dal.LogUser(name);
             if (user != null)
             {
-                if (user.UserPwaword.ToUpper() == pwd.Md5().ToUpper())
+                if (user.UserPassword.ToUpper() == pwd.Md5().ToUpper())
                 {
                     return new ResultDto { Result = Result.Success, Message = "登陆成功" };
                 }

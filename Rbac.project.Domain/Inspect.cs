@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace Rbac.project.Domain
         /// <summary>
         /// 信息创建人
         /// </summary>
+        [StringLength(50)]
         public string? MesgCreateUser { get; set; }
         /// <summary>
         /// 信息创建日期
@@ -19,6 +21,7 @@ namespace Rbac.project.Domain
         /// <summary>
         /// 信息删除人
         /// </summary>
+        [StringLength(50)]
         public string? MegDeleteUser { get; set; }
         /// <summary>
         /// 信息删除日期
@@ -27,6 +30,7 @@ namespace Rbac.project.Domain
         /// <summary>
         /// 信息修改人
         /// </summary>
+        [StringLength(50)]
         public string? MsgUpdateUser { get; set; }
         /// <summary>
         /// 信息修改日期
