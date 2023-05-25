@@ -60,5 +60,12 @@ namespace Rbac.project.Repoistorys
         {
             return await db.Set<T>().FirstOrDefaultAsync(predicate);
         }
+
+        public  T Update(T t)
+        {
+            db.Set<T>().Update(t);
+            db.SaveChanges();
+            return  t;
+        }
     }
 }

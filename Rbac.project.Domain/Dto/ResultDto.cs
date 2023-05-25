@@ -18,12 +18,12 @@ namespace Rbac.project.Domain.Dto
         public string Message { get;set; }
 
     }
-    public class ResultDto<T>:ResultDto
+    public class ResultDtoData:ResultDto
     {
         /// <summary>
         /// 实体信息
         /// </summary>
-        public T Data { get; set; }
+        public object Data { get; set; }
     }
 
     public enum Result

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.IService
 {
-    public interface IBaseService<T>where T : class
+    public interface IBaseService<T> where T : class
     {
         Task<List<T>> GetALL();
 
@@ -15,5 +15,7 @@ namespace Rbac.project.IService
 
         Task<T> FindAsync(int id);
 
+
+        T Update(T t);
     }
 }

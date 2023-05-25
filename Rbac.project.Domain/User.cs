@@ -28,6 +28,11 @@ namespace Rbac.project.Domain
         [StringLength(100)]
         public string UserEmail { get; set; }
         /// <summary>
+        /// 用户头像
+        /// </summary>
+        [StringLength(400)]
+        public string UserImg { get; set; }
+        /// <summary>
         /// 用户注册日期
         /// </summary>
         public DateTime UserCreateTime { get; set; }
@@ -45,5 +50,7 @@ namespace Rbac.project.Domain
         /// </summary>
         [StringLength(100)]
         public string LastLoginIP { get; set; }
+
+        
     }
 }

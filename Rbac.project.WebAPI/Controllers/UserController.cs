@@ -5,6 +5,7 @@ using Rbac.project.Domain.Dto;
 using Rbac.project.IService;
 using Rbac.project.Utility;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace Rbac.project.WebAPI.Controllers
@@ -30,22 +31,39 @@ namespace Rbac.project.WebAPI.Controllers
             var user = bll.UserLog(dto.name, dto.pwd);
             return await user;
         }
-
+        /// <summary>
+        /// 添加用户信息
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         [HttpPost("CreateUser")]
-        public async Task<User> CreateUser(User user)
+        public async Task<ResultDtoData> CreateUser(User user)
         {
             var us=await bll.InsertAsync(user);
-            return  us;
+            if (us.UserId>0)
+            {
+                return new ResultDtoData { Result = Result.Success, Message = "用户添加成功" };
+            }
+            else if(us.UserId==-1)
+            {
+                return new ResultDtoData { Result = Result.Success, Message = "用户已存在" };
+            }
+            else
+            {
+                return new ResultDtoData { Result = Result.Success, Message = "用户添加失败" };
+            }
+            
         }
         /// <summary>
         /// 查询用户全部信息
         /// </summary>
         /// <returns></returns>
         [HttpGet("GetUserAll")]
-        public async Task<List<User>> GetUserAll()
+        public async Task<ResultDtoData> GetUserAll()
         {
-            var list = bll.GetALL();
-            return await list;
+            var list = await bll.GetALL();
+            var result = new ResultDtoData { Result = Result.Success, Message = "数据查询成功", Data = list };
+            return  result;
         }
         /// <summary>
         /// 反填修改用户信息
@@ -53,10 +71,33 @@ namespace Rbac.project.WebAPI.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("EditUser")]
-        public async Task<User> EditUser(int id)
+        public async Task<ResultDtoData> EditUser(int id)
         {
             var user= await bll.FindAsync(id);
-            return user;
+            var result = new ResultDtoData { Result = Result.Success, Message = "修改信息回显成功", Data = user };
+            return result;
+        }
+        /// <summary>
+        /// 修改用户信息
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPut("UpdateUser")]
+        public ResultDtoData UpdateUser(User user)
+        {
+            var res=bll.UpdateUser(user);
+
+            return res;
+        }
+        /// <summary>
+        /// 重置用户密码
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPut("ResetUserPasswrod")]
+        public ResultDtoData ResetUserPasswrod(UserDto dto)
+        {
+            return bll.ResetUserPasswrod(dto);
         }
     }
 }

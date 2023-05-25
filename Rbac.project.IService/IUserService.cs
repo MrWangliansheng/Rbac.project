@@ -12,5 +12,8 @@ namespace Rbac.project.IService
     public interface IUserService:IBaseService<User>
     {
         Task<ResultDto> UserLog(string name,string pwd);
+        ResultDtoData UpdateUser(User user);
+        ResultDtoData ResetUserPasswrod(UserDto dto);
+
     }
 }

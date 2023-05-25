@@ -30,11 +30,14 @@ namespace Rbac.project.Service
             throw new NotImplementedException();
         }
 
-        public async Task<T> InsertAsync(T t)
+        public virtual async Task<T> InsertAsync(T t)
         {
             return await Idal.InsertAsync(t);
         }
 
-
+        public T Update(T t)
+        {
+            return Idal.Update(t);
+        }
     }
 }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.IRepoistory
 {
-    public interface IBaseRepoistory<T> where T:class
+    public interface IBaseRepoistory<T> where T : class
     {
         Task<List<T>> GetALL();
 
@@ -13,6 +13,8 @@ namespace Rbac.project.IRepoistory
         T Insert(T t);
 
         Task<T> FindAsync(int id);
+
+        T Update(T t);
 
     }
 }

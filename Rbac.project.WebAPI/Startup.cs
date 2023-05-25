@@ -36,12 +36,14 @@ namespace Rbac.project.WebAPI
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rbac.project.WebAPI", Version = "v1" });
+                string path = AppContext.BaseDirectory + "Rbac.project.WebAPI.xml";
+                c.IncludeXmlComments(path,true);
             });
 
             services.AddCors(m =>
             {
                 m.AddPolicy("cors", op => op
-                .WithOrigins("http://localhost:8082")
+                .WithOrigins(Configuration["CorsPolicy:Cors"])
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .WithExposedHeaders("X-Pagination"));
@@ -54,7 +56,10 @@ namespace Rbac.project.WebAPI
             services.AddScoped<IUserService, UserService>();
 
             services.AddScoped<IUserRepoistory, UserRepoistory>();
-            
+            services.AddScoped<IRoleService, RoleService>();
+
+            services.AddScoped<IRoleRepoistory, RoleRepoistory>();
+
         }
 
         // 此方法由运行时调用。使用此方法配置HTTP请求管道。
