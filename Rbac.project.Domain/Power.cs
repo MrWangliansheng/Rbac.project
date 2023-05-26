@@ -26,8 +26,19 @@ namespace Rbac.project.Domain
         [StringLength(50)]
         public string PowerRoute { get; set; }
         /// <summary>
+        /// 菜单上级ID
+        /// </summary>
+        public int PowerParentId { get; set; }
+        /// <summary>
         /// 权限创建日期
         /// </summary>
         public DateTime PowerTime { get; set; }
+
+        /// <summary>
+        /// 是否删除
+        /// </summary>
+        public bool PowerIsDelete { get; set; }
+        //[NotMapped]
+        //public List<Power> PoweList { get; set; }
     }
 }

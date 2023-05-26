@@ -39,20 +39,20 @@ namespace Rbac.project.WebAPI.Controllers
         [HttpPost("CreateUser")]
         public async Task<ResultDtoData> CreateUser(User user)
         {
-            var us=await bll.InsertAsync(user);
-            if (us.UserId>0)
+            var us = await bll.InsertAsync(user);
+            if (us.UserId > 0)
             {
                 return new ResultDtoData { Result = Result.Success, Message = "用户添加成功" };
             }
-            else if(us.UserId==-1)
+            else if (us.UserId == -1)
             {
                 return new ResultDtoData { Result = Result.Success, Message = "用户已存在" };
             }
             else
             {
-                return new ResultDtoData { Result = Result.Success, Message = "用户添加失败" };
+                return new ResultDtoData { Result = Result.Warning, Message = "用户添加失败" };
             }
-            
+
         }
         /// <summary>
         /// 查询用户全部信息
@@ -63,7 +63,18 @@ namespace Rbac.project.WebAPI.Controllers
         {
             var list = await bll.GetALL();
             var result = new ResultDtoData { Result = Result.Success, Message = "数据查询成功", Data = list };
-            return  result;
+            return result;
+        }
+        /// <summary>
+        /// 分页查询用户信息
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpGet("GetUserInfoPage")]
+        public async Task<IActionResult> GetUserInfoPage([FromQuery] UserDto dto)
+        {
+            var result = await bll.GetUserInfoPage(dto);
+            return Ok(result);
         }
         /// <summary>
         /// 反填修改用户信息
@@ -73,7 +84,7 @@ namespace Rbac.project.WebAPI.Controllers
         [HttpGet("EditUser")]
         public async Task<ResultDtoData> EditUser(int id)
         {
-            var user= await bll.FindAsync(id);
+            var user = await bll.FindAsync(id);
             var result = new ResultDtoData { Result = Result.Success, Message = "修改信息回显成功", Data = user };
             return result;
         }
@@ -85,7 +96,7 @@ namespace Rbac.project.WebAPI.Controllers
         [HttpPut("UpdateUser")]
         public ResultDtoData UpdateUser(User user)
         {
-            var res=bll.UpdateUser(user);
+            var res = bll.UpdateUser(user);
 
             return res;
         }
@@ -98,6 +109,24 @@ namespace Rbac.project.WebAPI.Controllers
         public ResultDtoData ResetUserPasswrod(UserDto dto)
         {
             return bll.ResetUserPasswrod(dto);
+        }
+        /// <summary>
+        /// 逻辑删除用户信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete("LogicDeleteAsyncUser")]
+        public async Task<IActionResult> LogicDeleteAsyncUser(int id)
+        {
+            var user = await bll.LogicDeleteAsync(id);
+            if (user.UserIsDelete)
+            {
+                return Ok(new ResultDto { Result = Result.Success, Message = "删除成功" });
+            }
+            else
+            {
+                return Ok(new ResultDto { Result = Result.Success, Message = "删除失败" });
+            }
         }
     }
 }

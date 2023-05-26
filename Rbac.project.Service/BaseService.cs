@@ -35,6 +35,11 @@ namespace Rbac.project.Service
             return await Idal.InsertAsync(t);
         }
 
+        public async Task<T> LogicDeleteAsync(int id)
+        {
+            return await Idal.LogicDeleteAsync(id);
+        }
+
         public T Update(T t)
         {
             return Idal.Update(t);

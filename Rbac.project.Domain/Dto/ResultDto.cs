@@ -11,11 +11,11 @@ namespace Rbac.project.Domain.Dto
         /// <summary>
         /// 状态
         /// </summary>
-        public Result Result { get; set; }
+        public Result? Result { get; set; }
         /// <summary>
         /// 信息
         /// </summary>
-        public string Message { get;set; }
+        public string? Message { get;set; }
 
     }
     public class ResultDtoData:ResultDto
@@ -23,12 +23,13 @@ namespace Rbac.project.Domain.Dto
         /// <summary>
         /// 实体信息
         /// </summary>
-        public object Data { get; set; }
+        public object? Data { get; set; }
     }
 
     public enum Result
     {
         Success=200,
-        Error=500
+        Error=500,
+        Warning=100,//警告
     }
 }

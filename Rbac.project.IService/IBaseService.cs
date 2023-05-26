@@ -17,5 +17,7 @@ namespace Rbac.project.IService
 
 
         T Update(T t);
+
+        Task<T> LogicDeleteAsync(int id);
     }
 }

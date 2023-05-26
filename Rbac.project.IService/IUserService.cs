@@ -14,6 +14,7 @@ namespace Rbac.project.IService
         Task<ResultDto> UserLog(string name,string pwd);
         ResultDtoData UpdateUser(User user);
         ResultDtoData ResetUserPasswrod(UserDto dto);
+        Task<PageDto> GetUserInfoPage(UserDto dto);
 
     }
 }

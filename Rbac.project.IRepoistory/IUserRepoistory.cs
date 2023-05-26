@@ -18,5 +18,8 @@ namespace Rbac.project.IRepoistory
         /// <param name="password"></param>
         /// <returns></returns>
         int ResetUserPasswrod (int userid,string password);
+
+        Task<PageDto> GetUserInfoPage(UserDto dto);
+
     }
 }

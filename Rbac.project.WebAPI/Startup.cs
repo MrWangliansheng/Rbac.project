@@ -11,11 +11,14 @@ using Rbac.project.Domain;
 using Rbac.project.IRepoistory;
 using Rbac.project.IService;
 using Rbac.project.Repoistorys;
+using Rbac.project.Repoistorys.AutoMapper;
 using Rbac.project.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using CSRedis;
 
 namespace Rbac.project.WebAPI
 {
@@ -31,15 +34,15 @@ namespace Rbac.project.WebAPI
         // 此方法由运行时调用。使用此方法将服务添加到容器中。
         public void ConfigureServices(IServiceCollection services)
         {
-
+            
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rbac.project.WebAPI", Version = "v1" });
                 string path = AppContext.BaseDirectory + "Rbac.project.WebAPI.xml";
-                c.IncludeXmlComments(path,true);
+                c.IncludeXmlComments(path, true);
             });
-
+            services.AddSingleton<CSRedisClient>(new CSRedisClient("127.0.0.1:6379"));
             services.AddCors(m =>
             {
                 m.AddPolicy("cors", op => op
@@ -49,17 +52,20 @@ namespace Rbac.project.WebAPI
                 .WithExposedHeaders("X-Pagination"));
             });
 
-            services.AddDbContext<RbacDbContext>(m => m.UseSqlServer(Configuration.GetConnectionString("ConStr"), m => m.MigrationsAssembly("Rbac.project.WebAPI")));
 
+
+            services.AddDbContext<RbacDbContext>(m => m.UseSqlServer(Configuration.GetConnectionString("ConStr"), m => m.MigrationsAssembly("Rbac.project.WebAPI")));
+            services.AddAutoMapper(typeof(AutoMapperProfile));
             services.AddScoped(typeof(IBaseRepoistory<>), typeof(BaseRepoistory<>));
             services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
+            
+            
             services.AddScoped<IUserService, UserService>();
 
             services.AddScoped<IUserRepoistory, UserRepoistory>();
             services.AddScoped<IRoleService, RoleService>();
 
             services.AddScoped<IRoleRepoistory, RoleRepoistory>();
-
         }
 
         // 此方法由运行时调用。使用此方法配置HTTP请求管道。
@@ -72,11 +78,11 @@ namespace Rbac.project.WebAPI
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Rbac.project.WebAPI v1"));
             }
-
+            
             app.UseRouting();
 
             app.UseAuthorization();
-
+            app.UseStaticFiles();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

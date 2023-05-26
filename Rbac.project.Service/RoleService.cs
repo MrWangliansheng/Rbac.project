@@ -1,4 +1,5 @@
 ﻿using Rbac.project.Domain;
+using Rbac.project.Domain.Dto;
 using Rbac.project.IRepoistory;
 using Rbac.project.IService;
 using System;
@@ -17,7 +18,9 @@ namespace Rbac.project.Service
             this.dal = dal;
         }
 
-        
-        
+        public ResultDtoData GetRoleTree()
+        {
+            return dal.GetRoleTree();
+        }
     }
 }

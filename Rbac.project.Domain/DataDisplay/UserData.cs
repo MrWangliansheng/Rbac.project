@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Rbac.project.Domain
+namespace Rbac.project.Domain.DataDisplay
 {
-    [Table("User")]
-    public class User : Inspect
+    public class UserData:Inspect
     {
+
         /// <summary>
         /// 用户ID
         /// </summary>
@@ -15,22 +18,22 @@ namespace Rbac.project.Domain
         /// <summary>
         /// 用户名称
         /// </summary>
-        [StringLength(50)]
+        
         public string UserName { get; set; }
         /// <summary>
         /// 用户密码
         /// </summary>
-        [StringLength (50)]
+       
         public string UserPassword { get; set; }
         /// <summary>
         /// 用户邮箱
         /// </summary>
-        [StringLength(100)]
+       
         public string UserEmail { get; set; }
         /// <summary>
         /// 用户头像
         /// </summary>
-        [StringLength(400)]
+        
         public string UserImg { get; set; }
         /// <summary>
         /// 用户注册日期
@@ -39,7 +42,7 @@ namespace Rbac.project.Domain
         /// <summary>
         /// 用户名全称
         /// </summary>
-        [StringLength(50)]
+        
         public string PullName { get; set; }
         /// <summary>        
         ///末次登录时间
@@ -50,17 +53,5 @@ namespace Rbac.project.Domain
         /// </summary>
         [StringLength(100)]
         public string LastLoginIP { get; set; }
-        /// <summary>
-        /// 是否删除
-        /// </summary>
-        public bool UserIsDelete { get; set; }
-        /// <summary>
-        /// 用户账号状态
-        /// </summary>
-        public bool UserState { get; set; }
-        /// <summary>
-        /// 用户描述
-        /// </summary>
-        public string UserDesc { get; set; }
     }
 }

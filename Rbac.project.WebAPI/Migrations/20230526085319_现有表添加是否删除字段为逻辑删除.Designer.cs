@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rbac.project.Repoistorys;
 
 namespace Rbac.project.WebAPI.Migrations
 {
     [DbContext(typeof(RbacDbContext))]
-    partial class RbacDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230526085319_现有表添加是否删除字段为逻辑删除")]
+    partial class 现有表添加是否删除字段为逻辑删除
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -175,9 +177,6 @@ namespace Rbac.project.WebAPI.Migrations
                     b.Property<DateTime>("UserCreateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserDesc")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("UserEmail")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -196,9 +195,6 @@ namespace Rbac.project.WebAPI.Migrations
                     b.Property<string>("UserPassword")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("UserState")
-                        .HasColumnType("bit");
 
                     b.HasKey("UserId");
 

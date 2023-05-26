@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rbac.project.Repoistorys;
 
 namespace Rbac.project.WebAPI.Migrations
 {
     [DbContext(typeof(RbacDbContext))]
-    partial class RbacDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230526004225_添加角色上级ID和权限上级ID")]
+    partial class 添加角色上级ID和权限上级ID
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,9 +48,6 @@ namespace Rbac.project.WebAPI.Migrations
                     b.Property<string>("MsgUpdateUser")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("PowerIsDelete")
-                        .HasColumnType("bit");
 
                     b.Property<string>("PowerName")
                         .HasMaxLength(50)
@@ -99,9 +98,6 @@ namespace Rbac.project.WebAPI.Migrations
 
                     b.Property<DateTime>("RoleCreateTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("RoleIsDelete")
-                        .HasColumnType("bit");
 
                     b.Property<string>("RoleName")
                         .HasMaxLength(50)
@@ -175,9 +171,6 @@ namespace Rbac.project.WebAPI.Migrations
                     b.Property<DateTime>("UserCreateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserDesc")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("UserEmail")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -186,9 +179,6 @@ namespace Rbac.project.WebAPI.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)");
 
-                    b.Property<bool>("UserIsDelete")
-                        .HasColumnType("bit");
-
                     b.Property<string>("UserName")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -196,9 +186,6 @@ namespace Rbac.project.WebAPI.Migrations
                     b.Property<string>("UserPassword")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("UserState")
-                        .HasColumnType("bit");
 
                     b.HasKey("UserId");
 

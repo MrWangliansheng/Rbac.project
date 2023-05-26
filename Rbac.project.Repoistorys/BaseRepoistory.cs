@@ -26,7 +26,7 @@ namespace Rbac.project.Repoistorys
         /// 查询所有数据
         /// </summary>
         /// <returns></returns>
-        public async Task<List<T>> GetALL()
+        public virtual async Task<List<T>> GetALL()
         {
             var list = await db.Set<T>().ToListAsync();
             return list;
@@ -53,6 +53,17 @@ namespace Rbac.project.Repoistorys
         {
             await db.Set<T>().AddAsync(t);
             await db.SaveChangesAsync();
+            return t;
+        }
+        /// <summary>
+        /// 逻辑删除信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public virtual async Task<T> LogicDeleteAsync(int id)
+        {
+            var t= await db.Set<T>().FindAsync(id);
+            db.Set<T>().Update(t);
             return t;
         }
 

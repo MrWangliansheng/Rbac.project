@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.Domain.Dto
 {
-    public class UserDto
+    public class UserDto:PageDto
     {
         /// <summary>
         /// 用户ID 
@@ -24,7 +24,14 @@ namespace Rbac.project.Domain.Dto
         /// 验证码
         /// </summary>
         public string? code { get; set; }
-
+        /// <summary>
+        /// 创建开始时间
+        /// </summary>
+        public DateTime? createstartime { get; set; }
+        /// <summary>
+        /// 创建结束时间
+        /// </summary>
+        public DateTime? createendtime { get; set; }
         
     }
 }

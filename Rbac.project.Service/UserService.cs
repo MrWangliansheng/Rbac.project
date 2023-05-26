@@ -40,6 +40,16 @@ namespace Rbac.project.Service
             }
         }
         /// <summary>
+        /// 分页查询用户信息
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        public async Task<PageDto> GetUserInfoPage(UserDto dto)
+        {
+            return await dal.GetUserInfoPage(dto);
+        }
+
+        /// <summary>
         /// 重置用户密码
         /// </summary>
         /// <param name="dto"></param>
@@ -63,8 +73,6 @@ namespace Rbac.project.Service
                 return new ResultDtoData {Result=Result.Error, Message = ex.Message };
             }
         }
-
-
 
         /// <summary>
         /// 修改用户信息
@@ -134,5 +142,6 @@ namespace Rbac.project.Service
                 return new ResultDto { Result=Result.Error, Message = ex.Message };
             }
         }
+
     }
 }

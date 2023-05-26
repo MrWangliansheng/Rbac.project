@@ -16,5 +16,7 @@ namespace Rbac.project.IRepoistory
 
         T Update(T t);
 
+         Task<T> LogicDeleteAsync(int id);
+
     }
 }
