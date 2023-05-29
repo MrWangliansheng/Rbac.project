@@ -25,6 +25,10 @@ namespace Rbac.project.Domain
         /// </summary>
         public int RoleParentId { get; set; }
         /// <summary>
+        /// 全部上级ID
+        /// </summary>
+        public string RoleParentIdAll { get;set; }
+        /// <summary>
         /// 角色添加日期
         /// </summary>
         public DateTime RoleCreateTime { get; set; }=DateTime.Now;

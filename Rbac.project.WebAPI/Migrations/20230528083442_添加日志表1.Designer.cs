@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rbac.project.Repoistorys;
 
 namespace Rbac.project.WebAPI.Migrations
 {
     [DbContext(typeof(RbacDbContext))]
-    partial class RbacDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230528083442_添加日志表1")]
+    partial class 添加日志表1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,18 +86,12 @@ namespace Rbac.project.WebAPI.Migrations
                     b.Property<int>("PowerParentId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PowerParentIdAll")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PowerRoute")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("PowerTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("PowerType")
-                        .HasColumnType("int");
 
                     b.HasKey("PowerId");
 
@@ -142,9 +138,6 @@ namespace Rbac.project.WebAPI.Migrations
 
                     b.Property<int>("RoleParentId")
                         .HasColumnType("int");
-
-                    b.Property<string>("RoleParentIdAll")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId");
 

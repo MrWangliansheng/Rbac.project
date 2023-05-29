@@ -15,5 +15,10 @@ namespace Rbac.project.IService
         /// <param name="id"></param>
         /// <returns></returns>
         ResultDtoData GetPowerTree();
+
+        Task<ResultDtoData> GetPowerTreeTableLevelone(int id = 0);
+
+        ResultDtoData GetPowerEnum();
+        ResultDtoData GetPowerTreeData();
     }
 }

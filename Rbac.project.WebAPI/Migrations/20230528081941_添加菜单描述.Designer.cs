@@ -3,45 +3,23 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rbac.project.Repoistorys;
 
 namespace Rbac.project.WebAPI.Migrations
 {
     [DbContext(typeof(RbacDbContext))]
-    partial class RbacDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230528081941_添加菜单描述")]
+    partial class 添加菜单描述
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.17")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("Rbac.project.Domain.LogData", b =>
-                {
-                    b.Property<int>("LogDataId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LogMessage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LogName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Operator")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("LogDataId");
-
-                    b.ToTable("LogData");
-                });
 
             modelBuilder.Entity("Rbac.project.Domain.Power", b =>
                 {
@@ -84,18 +62,12 @@ namespace Rbac.project.WebAPI.Migrations
                     b.Property<int>("PowerParentId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PowerParentIdAll")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PowerRoute")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("PowerTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("PowerType")
-                        .HasColumnType("int");
 
                     b.HasKey("PowerId");
 
@@ -142,9 +114,6 @@ namespace Rbac.project.WebAPI.Migrations
 
                     b.Property<int>("RoleParentId")
                         .HasColumnType("int");
-
-                    b.Property<string>("RoleParentIdAll")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId");
 

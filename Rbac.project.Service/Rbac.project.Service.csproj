@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Rbac.project.IRepoistory\Rbac.project.IRepoistory.csproj" />
     <ProjectReference Include="..\Rbac.project.IService\Rbac.project.IService.csproj" />
   </ItemGroup>

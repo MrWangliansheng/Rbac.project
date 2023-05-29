@@ -31,6 +31,10 @@ namespace Rbac.project.Repoistorys
         /// 角色权限
         /// </summary>
         public DbSet<RolePower> RolePower { get; set; }
+        /// <summary>
+        /// 日志信息表
+        /// </summary>
+        public DbSet<LogData> LogData { get; set; }
         
     }
 }

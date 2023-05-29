@@ -17,7 +17,7 @@ namespace Rbac.project.Repoistorys
             this.db = db;
         }
 
-        public async Task<T> FindAsync(int id)
+        public virtual async Task<T> FindAsync(int id)
         {
             return await db.Set<T>().FindAsync(id);
         }
@@ -72,7 +72,7 @@ namespace Rbac.project.Repoistorys
             return await db.Set<T>().FirstOrDefaultAsync(predicate);
         }
 
-        public  T Update(T t)
+        public virtual T Update(T t)
         {
             db.Set<T>().Update(t);
             db.SaveChanges();

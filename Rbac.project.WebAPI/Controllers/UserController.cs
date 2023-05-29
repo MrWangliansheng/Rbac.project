@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using CSRedis;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Rbac.project.Domain;
+using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.IService;
 using Rbac.project.Utility;
@@ -14,9 +17,13 @@ namespace Rbac.project.WebAPI.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        private readonly CSRedisClient cs;
         public readonly IUserService bll;
-        public UserController(IUserService bll)
+        private readonly IMapper mapper;
+        public UserController(IUserService bll, CSRedisClient cs, IMapper mapper)
         {
+            this.mapper = mapper;
+            this.cs = cs;
             this.bll = bll;
         }
         /// <summary>
@@ -28,6 +35,11 @@ namespace Rbac.project.WebAPI.Controllers
         [HttpPost("UserLog")]
         public async Task<ResultDto> UserLog(UserDto dto)
         {
+            var code = await cs.GetAsync(dto.guid);
+            if (code.ToLower() != dto.code.ToLower())
+            {
+                return new ResultDto { Result = Result.Warning, Message = "验证码有误" };
+            }
             var user = bll.UserLog(dto.name, dto.pwd);
             return await user;
         }
@@ -37,7 +49,7 @@ namespace Rbac.project.WebAPI.Controllers
         /// <param name="user"></param>
         /// <returns></returns>
         [HttpPost("CreateUser")]
-        public async Task<ResultDtoData> CreateUser(User user)
+        public async Task<ResultDtoData> CreateUser(UserData user)
         {
             var us = await bll.InsertAsync(user);
             if (us.UserId > 0)
@@ -94,7 +106,7 @@ namespace Rbac.project.WebAPI.Controllers
         /// <param name="user"></param>
         /// <returns></returns>
         [HttpPut("UpdateUser")]
-        public ResultDtoData UpdateUser(User user)
+        public ResultDtoData UpdateUser(UserData user)
         {
             var res = bll.UpdateUser(user);
 
@@ -118,7 +130,7 @@ namespace Rbac.project.WebAPI.Controllers
         [HttpDelete("LogicDeleteAsyncUser")]
         public async Task<IActionResult> LogicDeleteAsyncUser(int id)
         {
-            var user = await bll.LogicDeleteAsync(id);
+            var user =  mapper.Map<User>(await bll.LogicDeleteAsync(id));
             if (user.UserIsDelete)
             {
                 return Ok(new ResultDto { Result = Result.Success, Message = "删除成功" });

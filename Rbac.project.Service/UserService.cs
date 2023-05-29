@@ -11,14 +11,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using Rbac.project.Domain.DataDisplay;
+using AutoMapper;
 
 namespace Rbac.project.Service
 {
-    public class UserService : BaseService<User>, IUserService
+    public class UserService : BaseService<UserData>, IUserService
     {
         public readonly IUserRepoistory dal;
-        public UserService(IUserRepoistory dal) : base(dal)
+        public readonly IMapper mapper;
+        public UserService(IUserRepoistory dal, IMapper mapper) : base(dal)
         {
+            this.mapper = mapper;
             this.dal = dal;
         }
 
@@ -30,8 +34,8 @@ namespace Rbac.project.Service
         {
             try
             {
-                var list = dal.GetALL();
-                return await list;
+                var list = await dal.GetALL();
+                return mapper.Map<List<User>>(list);
             }
             catch (Exception)
             {
@@ -79,7 +83,7 @@ namespace Rbac.project.Service
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public ResultDtoData UpdateUser(User user)
+        public ResultDtoData UpdateUser(UserData user)
         {
             try
             {
@@ -87,10 +91,13 @@ namespace Rbac.project.Service
                 if (use.UserId > 0)
                 {
                     return new ResultDtoData { Result = Result.Success, Message = "修改用户信息成功", Data = use };
+                } else if (use.UserId == -1)
+                {
+                    return new ResultDtoData { Result = Result.Warning, Message = "用户名已存在无法修修改" };
                 }
                 else
                 {
-                    return new ResultDtoData { Result = Result.Success, Message = "修改用户信息失败" };
+                    return new ResultDtoData { Result = Result.Warning, Message = "修改用户信息失败" };
                 }
             }
             catch (Exception ex)
@@ -122,19 +129,19 @@ namespace Rbac.project.Service
                             {
                                 user.LastLoginTime = DateTime.Now;
                                 user.LastLoginIP = addr.ToString();
-                                Idal.Update(user);
+                                Idal.Update(mapper.Map<UserData>(user));
                             }
                         }
                         return new ResultDto { Result = Result.Success, Message = "登陆成功" };
                     }
                     else
                     {
-                        return new ResultDto { Result = Result.Success, Message = "登录失败" };
+                        return new ResultDto { Result = Result.Success, Message = "登录失败用户名或密码错误" };
                     }
                 }
                 else
                 {
-                    return new ResultDto { Result = Result.Success, Message = "无账户信息" };
+                    return new ResultDto { Result = Result.Warning, Message = "无账户信息" };
                 }
             }
             catch (Exception ex)

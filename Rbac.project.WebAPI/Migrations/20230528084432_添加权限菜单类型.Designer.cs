@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rbac.project.Repoistorys;
 
 namespace Rbac.project.WebAPI.Migrations
 {
     [DbContext(typeof(RbacDbContext))]
-    partial class RbacDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230528084432_添加权限菜单类型")]
+    partial class 添加权限菜单类型
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,9 +86,6 @@ namespace Rbac.project.WebAPI.Migrations
                     b.Property<int>("PowerParentId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PowerParentIdAll")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PowerRoute")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -142,9 +141,6 @@ namespace Rbac.project.WebAPI.Migrations
 
                     b.Property<int>("RoleParentId")
                         .HasColumnType("int");
-
-                    b.Property<string>("RoleParentIdAll")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId");
 

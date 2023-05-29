@@ -1,4 +1,5 @@
 ﻿using Rbac.project.Domain;
+using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.IRepoistory
 {
-    public interface IUserRepoistory:IBaseRepoistory<User>
+    public interface IUserRepoistory:IBaseRepoistory<UserData>
     {
         Task<User> LogUser(string name);
         /// <summary>

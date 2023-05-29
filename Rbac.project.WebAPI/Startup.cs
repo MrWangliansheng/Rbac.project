@@ -19,6 +19,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using CSRedis;
+using Rbac.project.IRepoistory.LogOperation;
+using Rbac.project.Repoistory.LogOperation;
 
 namespace Rbac.project.WebAPI
 {
@@ -55,7 +57,9 @@ namespace Rbac.project.WebAPI
 
 
             services.AddDbContext<RbacDbContext>(m => m.UseSqlServer(Configuration.GetConnectionString("ConStr"), m => m.MigrationsAssembly("Rbac.project.WebAPI")));
+
             services.AddAutoMapper(typeof(AutoMapperProfile));
+
             services.AddScoped(typeof(IBaseRepoistory<>), typeof(BaseRepoistory<>));
             services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
             
@@ -66,6 +70,11 @@ namespace Rbac.project.WebAPI
             services.AddScoped<IRoleService, RoleService>();
 
             services.AddScoped<IRoleRepoistory, RoleRepoistory>();
+            services.AddScoped<IPowerRepoistory, PowerRepoistory>();
+            services.AddScoped<IPowerService, PowerService>();
+
+            services.AddScoped<ILogDataRepoistory, LogDataRepoistory>();
+            
         }
 
         // 此方法由运行时调用。使用此方法配置HTTP请求管道。

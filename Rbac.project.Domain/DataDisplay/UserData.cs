@@ -40,6 +40,10 @@ namespace Rbac.project.Domain.DataDisplay
         /// </summary>
         public DateTime UserCreateTime { get; set; }
         /// <summary>
+        /// 用户描述
+        /// </summary>
+        public string UserDesc { get; set; }
+        /// <summary>
         /// 用户名全称
         /// </summary>
         
@@ -53,5 +57,13 @@ namespace Rbac.project.Domain.DataDisplay
         /// </summary>
         [StringLength(100)]
         public string LastLoginIP { get; set; }
+        /// <summary>
+        /// 用户多个角色添加
+        /// </summary>
+        public List<int> RoleId { get; set; }
+        /// <summary>
+        /// 用户状态
+        /// </summary>
+        public bool UserState { get; set; }
     }
 }

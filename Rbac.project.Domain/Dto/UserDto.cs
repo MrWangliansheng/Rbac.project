@@ -25,6 +25,10 @@ namespace Rbac.project.Domain.Dto
         /// </summary>
         public string? code { get; set; }
         /// <summary>
+        /// 全球唯一标识符
+        /// </summary>
+        public string guid { get; set; }
+        /// <summary>
         /// 创建开始时间
         /// </summary>
         public DateTime? createstartime { get; set; }

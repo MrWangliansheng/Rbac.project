@@ -18,7 +18,7 @@ using Rbac.project.Domain.DataDisplay;
 
 namespace Rbac.project.Repoistorys
 {
-    public class UserRepoistory : BaseRepoistory<User>, IUserRepoistory
+    public class UserRepoistory : BaseRepoistory<UserData>, IUserRepoistory
     {
         private readonly RbacDbContext db;
         private readonly IMapper mapper;
@@ -52,7 +52,7 @@ namespace Rbac.project.Repoistorys
             return i;
         }
 
-        public override async Task<User> InsertAsync(User User)
+        public override async Task<UserData> InsertAsync(UserData User)
         {
             try
             {
@@ -64,17 +64,26 @@ namespace Rbac.project.Repoistorys
                 }
                 else
                 {
-                    await db.AddAsync(User);
+                    var user = mapper.Map<User>(User);
+                    await db.AddAsync(user);
                     await db.SaveChangesAsync();
-                    return User;
+                    foreach (var item in User.RoleId)
+                    {
+                        var userrole = new UserRole();
+                        userrole.RoleID = item;
+                        userrole.UserID = user.UserId;
+                        await db.AddAsync(userrole);
+                        await db.SaveChangesAsync();
+                    }
+                    return mapper.Map<UserData>(user);
                 }
             }
             catch (Exception)
             {
 
-               return User = null;
+                return null;
             }
-           
+
         }
         /// <summary>
         /// 分页查询用户信息
@@ -83,7 +92,7 @@ namespace Rbac.project.Repoistorys
         /// <returns></returns>
         public async Task<PageDto> GetUserInfoPage(UserDto dto)
         {
-            var list = db.Set<User>().Where(m=>m.UserIsDelete.Equals(false)).AsQueryable();
+            var list = db.Set<User>().Where(m => m.UserIsDelete.Equals(false)).AsQueryable();
 
             if (!string.IsNullOrEmpty(dto.name))
             {
@@ -110,12 +119,118 @@ namespace Rbac.project.Repoistorys
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public override async Task<User> LogicDeleteAsync(int id)
+        public override async Task<UserData> LogicDeleteAsync(int id)
         {
-            var user =await db.User.FindAsync(id);
+            var user = await db.User.FindAsync(id);
             user.UserIsDelete = true;
             await db.SaveChangesAsync();
-            return user;
+            return mapper.Map<UserData>(user);
+        }
+        /// <summary>
+        /// 重写用户回写方法
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public override async Task<UserData> FindAsync(int id)
+        {
+            try
+            {
+                var user = await db.User.FindAsync(id);
+                var userdata = mapper.Map<UserData>(user);
+                var userrolelist = db.UserRole.Where(m => m.UserID.Equals(id)).ToList();
+                List<int> roleid = new List<int>();
+                foreach (var item in userrolelist)
+                {
+                    roleid.Add(item.RoleID);
+                }
+                userdata.RoleId = roleid;
+                return userdata;
+            }
+            catch (Exception ex)
+            {
+                var log = new LogData { LogName= "/UserRepoistory/FindAsync",LogMessage=ex.Message,Operator="" };
+                db.Add(log);
+                return null;
+            }
+            
+        }
+        /// <summary>
+        /// 重写修改用户信息
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public override UserData Update(UserData user)
+        {
+            var transaction = db.Database.BeginTransaction();
+            try
+            {
+                var use = db.User.Where(m => m.UserId.Equals(user.UserId) & m.UserName.Equals(user.UserName)).ToList().FirstOrDefault();
+                if (use != null)
+                {
+                    var data = mapper.Map(user, use);
+                    db.Update(data);
+                    var i = db.SaveChanges();
+                    if (i > 0)
+                    {
+                        var userrolelist = db.UserRole.Where(m => m.UserID.Equals(user.UserId)).ToList();
+                        db.RemoveRange(userrolelist);
+                        if (user.RoleId!=null)
+                        {
+                            foreach (var item in user.RoleId)
+                            {
+                                var userrole = new UserRole();
+                                userrole.RoleID = item;
+                                userrole.UserID = data.UserId;
+                                userrolelist.Add(userrole);
+                            }
+                            db.AddRange(userrolelist);
+                            db.SaveChanges();
+                        }
+                        #region 添加日志信息
+                        var log = new LogData { LogName = "/UserRepoistory/Update", LogMessage = "修改了用户信息userid:" + user.UserId, Operator = "" };
+                        #endregion
+                        transaction.Commit();
+                        return user;
+                    }
+                    else
+                    {
+                        user.UserId = -2;//表示修改未成功
+                        return user;
+                    }
+                }
+                else
+                {
+                    use = db.User.Where(m => m.UserName.Equals(user.UserName)).ToList().FirstOrDefault();
+                    if (use != null)
+                    {
+                        user.UserId = -1;
+                        return user;
+                    }
+                    var data = mapper.Map(user, use);
+                    db.Update(data);
+                    var i = db.SaveChanges();
+                    var log = new LogData { LogName = "/UserRepoistory/Update", LogMessage = "修改了用户信息userid:" + user.UserId, Operator = "" };
+                    transaction.Commit();
+                    if (i > 0)
+                    {
+                        return user;
+                    }
+                    else
+                    {
+                        user.UserId = -2;//表示修改未成功
+                        return user;
+                    }
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                var log = new LogData { LogName = "/UserRepoistory/Update", LogMessage = ex.Message, Operator = "" };
+                user.UserId = -1;
+                return user;
+            }
+
         }
     }
 }

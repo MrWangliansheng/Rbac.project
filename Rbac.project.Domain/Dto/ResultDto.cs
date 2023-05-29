@@ -18,7 +18,7 @@ namespace Rbac.project.Domain.Dto
         public string? Message { get;set; }
 
     }
-    public class ResultDtoData:ResultDto
+    public class ResultDtoData : ResultDto
     {
         /// <summary>
         /// 实体信息

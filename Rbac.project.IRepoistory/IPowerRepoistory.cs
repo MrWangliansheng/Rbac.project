@@ -1,4 +1,5 @@
-﻿using Rbac.project.Domain.Dto;
+﻿using Rbac.project.Domain;
+using Rbac.project.Domain.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.IRepoistory
 {
-    public interface IPowerRepoistory:IBaseRepoistory<ResultDtoData>
+    public interface IPowerRepoistory : IBaseRepoistory<ResultDtoData>
     {
         /// <summary>
         /// 菜单级联选择器绑定
@@ -15,5 +16,13 @@ namespace Rbac.project.IRepoistory
         /// <param name="id"></param>
         /// <returns></returns>
         ResultDtoData GetPowerTree(int id = 0);
+
+        Task<ResultDtoData> GetPowerTreeTableLevelone(int id = 0);
+
+        Task<List<Power>> GetPowerTreeSublevel(int id);
+
+        ResultDtoData GetPowerEnum();
+
+        ResultDtoData GetPowerTreeData(int id = 0);
     }
 }
