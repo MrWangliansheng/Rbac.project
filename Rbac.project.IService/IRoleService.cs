@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.IService
 {
-    public interface IRoleService:IBaseService<Role>
+    public interface IRoleService : IBaseService<Role, ResultDtoData>
     {
         ResultDtoData GetRoleTree();
+
+        Task<PageDto> GetRolePage(RoleDto dto);
     }
 }

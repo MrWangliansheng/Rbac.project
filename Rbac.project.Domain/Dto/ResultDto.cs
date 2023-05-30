@@ -16,6 +16,10 @@ namespace Rbac.project.Domain.Dto
         /// 信息
         /// </summary>
         public string? Message { get;set; }
+        /// <summary>
+        /// Token
+        /// </summary>
+        public string Key { get; set; }
 
     }
     public class ResultDtoData : ResultDto

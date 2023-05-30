@@ -1,4 +1,5 @@
 ﻿using CSRedis;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Rbac.project.Domain;
@@ -12,6 +13,7 @@ namespace Rbac.project.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RoleController : ControllerBase
     {
         public readonly CSRedisClient cs;
@@ -34,9 +36,9 @@ namespace Rbac.project.WebAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("GetRole")]
-        public async Task<IActionResult> GetRole()
+        public async Task<IActionResult> GetRole([FromQuery]RoleDto dto)
         {
-            return Ok(new ResultDtoData { Result = Result.Success, Message = "角色信息查询成功" ,Data= await bll.GetALL() });
+            return Ok(await bll.GetRolePage(dto));
         }
         /// <summary>
         /// 添加角色
@@ -79,14 +81,15 @@ namespace Rbac.project.WebAPI.Controllers
         public async Task<ResultDto> LogicDeleteAsyncRole(int id)
         {
             var role =await bll.LogicDeleteAsync(id);
-            if (role.RoleIsDelete)
-            {
-                return new ResultDto { Result = Result.Success, Message = "删除成功" };
-            }
-            else
-            {
-                return new ResultDto { Result = Result.Success, Message = "删除失败" };
-            }
+            return role;
+            //if (role.RoleIsDelete)
+            //{
+            //    return new ResultDto { Result = Result.Success, Message = "删除成功" };
+            //}
+            //else
+            //{
+            //    return new ResultDto { Result = Result.Success, Message = "删除失败" };
+            //}
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 
 namespace Rbac.project.IRepoistory
 {
-    public interface IBaseRepoistory<T> where T : class
+    public interface IBaseRepoistory<T> where T : class 
     {
         Task<List<T>> GetALL();
 
@@ -17,6 +19,8 @@ namespace Rbac.project.IRepoistory
         T Update(T t);
 
          Task<T> LogicDeleteAsync(int id);
+
+        Task<List<T>> GetAll (Expression<Func<T, bool>> predicate);
 
     }
 }

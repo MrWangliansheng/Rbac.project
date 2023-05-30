@@ -13,17 +13,22 @@ using System.Net;
 using System.Net.Sockets;
 using Rbac.project.Domain.DataDisplay;
 using AutoMapper;
-
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 namespace Rbac.project.Service
 {
-    public class UserService : BaseService<UserData>, IUserService
+    public class UserService : BaseService<UserData,ResultDtoData>, IUserService
     {
         public readonly IUserRepoistory dal;
         public readonly IMapper mapper;
-        public UserService(IUserRepoistory dal, IMapper mapper) : base(dal)
+        public readonly IConfiguration configuration;
+        public UserService(IUserRepoistory dal, IMapper mapper,IConfiguration configuration) : base(dal, mapper)
         {
             this.mapper = mapper;
             this.dal = dal;
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -78,6 +83,19 @@ namespace Rbac.project.Service
             }
         }
 
+
+        public override async Task<ResultDtoData> FindAsync(int id)
+        {
+            var user =await Idal.FindAsync(id);
+            if (user!=null)
+            {
+                return new ResultDtoData { Result = Result.Success, Message = "", Data = user };
+            }
+            else
+            {
+                return new ResultDtoData { Result = Result.Error, Message = "信息回显异常", Data = user };
+            }
+        }
         /// <summary>
         /// 修改用户信息
         /// </summary>
@@ -132,7 +150,16 @@ namespace Rbac.project.Service
                                 Idal.Update(mapper.Map<UserData>(user));
                             }
                         }
-                        return new ResultDto { Result = Result.Success, Message = "登陆成功" };
+                        SecurityKey key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["Kestrel:key"]));
+                        IList<Claim> claims=new List<Claim> {
+                            new Claim(ClaimTypes.NameIdentifier,user.UserId.ToString()),
+                            new Claim(ClaimTypes.Name,user.UserName.ToString()),
+                            new Claim(ClaimTypes.Email,user.UserEmail.ToString())
+                        };
+                        SecurityToken token = new JwtSecurityToken(issuer: "issuer", audience: "audience", signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
+                            expires: DateTime.Now.AddDays(0.1),
+                            claims: claims);
+                        return new ResultDto { Result = Result.Success, Message = "登陆成功",Key="Bearer "+new JwtSecurityTokenHandler().WriteToken(token) };
                     }
                     else
                     {

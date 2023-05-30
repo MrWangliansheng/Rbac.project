@@ -3,6 +3,7 @@ using Microsoft.VisualBasic;
 using Rbac.project.IRepoistory;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -31,6 +32,17 @@ namespace Rbac.project.Repoistorys
             var list = await db.Set<T>().ToListAsync();
             return list;
         }
+        /// <summary>
+        /// 查询分页信息
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public virtual async Task<List<T>> GetAll(Expression<Func<T, bool>> predicate)
+        {
+            var list=await db.Set<T>().Where(predicate).ToListAsync();
+            return list;
+        }
+
         /// <summary>
         /// 添加数据
         /// </summary>

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CSRedis;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Rbac.project.Domain;
@@ -15,6 +16,7 @@ namespace Rbac.project.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly CSRedisClient cs;
@@ -33,6 +35,7 @@ namespace Rbac.project.WebAPI.Controllers
         /// <param name="pwd"></param>
         /// <returns></returns>
         [HttpPost("UserLog")]
+        [AllowAnonymous]
         public async Task<ResultDto> UserLog(UserDto dto)
         {
             var code = await cs.GetAsync(dto.guid);
@@ -40,8 +43,9 @@ namespace Rbac.project.WebAPI.Controllers
             {
                 return new ResultDto { Result = Result.Warning, Message = "验证码有误" };
             }
-            var user = bll.UserLog(dto.name, dto.pwd);
-            return await user;
+            var user =await bll.UserLog(dto.name, dto.pwd);
+            
+            return  user;
         }
         /// <summary>
         /// 添加用户信息
@@ -52,18 +56,19 @@ namespace Rbac.project.WebAPI.Controllers
         public async Task<ResultDtoData> CreateUser(UserData user)
         {
             var us = await bll.InsertAsync(user);
-            if (us.UserId > 0)
-            {
-                return new ResultDtoData { Result = Result.Success, Message = "用户添加成功" };
-            }
-            else if (us.UserId == -1)
-            {
-                return new ResultDtoData { Result = Result.Success, Message = "用户已存在" };
-            }
-            else
-            {
-                return new ResultDtoData { Result = Result.Warning, Message = "用户添加失败" };
-            }
+            return us;
+            //if (us.UserId > 0)
+            //{
+            //    return new ResultDtoData { Result = Result.Success, Message = "用户添加成功" };
+            //}
+            //else if (us.UserId == -1)
+            //{
+            //    return new ResultDtoData { Result = Result.Success, Message = "用户已存在" };
+            //}
+            //else
+            //{
+            //    return new ResultDtoData { Result = Result.Warning, Message = "用户添加失败" };
+            //}
 
         }
         /// <summary>
@@ -97,8 +102,8 @@ namespace Rbac.project.WebAPI.Controllers
         public async Task<ResultDtoData> EditUser(int id)
         {
             var user = await bll.FindAsync(id);
-            var result = new ResultDtoData { Result = Result.Success, Message = "修改信息回显成功", Data = user };
-            return result;
+            //var result = new ResultDtoData { Result = Result.Success, Message = "修改信息回显成功", Data = user };
+            return user;
         }
         /// <summary>
         /// 修改用户信息

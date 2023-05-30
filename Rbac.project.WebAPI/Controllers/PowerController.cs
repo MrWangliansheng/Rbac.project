@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.IService;
 using System.Collections.Generic;
@@ -9,6 +11,7 @@ namespace Rbac.project.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PowerController : ControllerBase
     {
         private readonly IPowerService bll;
@@ -50,10 +53,11 @@ namespace Rbac.project.WebAPI.Controllers
         /// 权限菜单级联绑定
         /// </summary>
         /// <returns></returns>
-        [HttpGet("GetPowerTreeData")]
-        public ResultDtoData GetPowerTreeData()
-        {
-            return bll.GetPowerTreeData();
-        }
+        //[HttpGet("CreatePower")]
+        //public async Task<ResultDtoData> CreatePower(PowerData power)
+        //{
+        //    var t= await bll.InsertAsync(power);
+        //    return 
+        //}
     }
 }

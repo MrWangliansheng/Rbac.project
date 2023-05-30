@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.Domain.Dto
 {
-    public class RoleDto
+    public class RoleDto:PageDto
     {
         /// <summary>
         /// 名称

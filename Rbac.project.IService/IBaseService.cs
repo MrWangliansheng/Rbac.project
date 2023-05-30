@@ -1,23 +1,26 @@
 ﻿using Rbac.project.Domain;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Rbac.project.IService
 {
-    public interface IBaseService<T> where T : class
+    public interface IBaseService<T,T1> where T : class where T1 : class
     {
-        Task<List<T>> GetALL();
+        Task<List<T1>> GetALL();
 
-        Task<T> InsertAsync(T t);
+        Task<T1> InsertAsync(T t);
 
         int Insert(T t);
 
-        Task<T> FindAsync(int id);
+        Task<T1> FindAsync(int id);
 
 
-        T Update(T t);
+        T1 Update(T t);
 
-        Task<T> LogicDeleteAsync(int id);
+        Task<T1> LogicDeleteAsync(int id);
+
+        Task<List<T1>> GetPage(Expression<Func<T, bool>> predicate);
     }
 }

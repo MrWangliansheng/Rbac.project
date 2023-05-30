@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.IService
 {
-    public interface IUserService:IBaseService<UserData>
+    public interface IUserService:IBaseService<UserData, ResultDtoData>
     {
         Task<ResultDto> UserLog(string name,string pwd);
         ResultDtoData UpdateUser(UserData user);

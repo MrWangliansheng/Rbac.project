@@ -1,4 +1,6 @@
-﻿using Rbac.project.Domain.Dto;
+﻿using AutoMapper;
+using Rbac.project.Domain.DataDisplay;
+using Rbac.project.Domain.Dto;
 using Rbac.project.IRepoistory;
 using Rbac.project.IService;
 using System;
@@ -9,12 +11,14 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.Service
 {
-    public class PowerService:BaseService<ResultDtoData>,IPowerService
+    public class PowerService:BaseService<PowerData, ResultDtoData>,IPowerService
     {
         private readonly IPowerRepoistory dal;
-        public PowerService(IPowerRepoistory dal):base(dal) 
+        private readonly IMapper mapper;
+        public PowerService(IPowerRepoistory dal, IMapper mapper) :base(dal,mapper) 
         {
             this.dal = dal;
+            this.mapper = mapper;
         }
 
         public ResultDtoData GetPowerEnum()
@@ -51,5 +55,10 @@ namespace Rbac.project.Service
         {
             return await dal.GetPowerTreeTableLevelone(id);
         }
+
+        #region 权限菜单操作
+
+        
+        #endregion
     }
 }

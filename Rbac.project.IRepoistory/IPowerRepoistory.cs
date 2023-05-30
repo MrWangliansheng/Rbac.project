@@ -1,4 +1,5 @@
 ﻿using Rbac.project.Domain;
+using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.IRepoistory
 {
-    public interface IPowerRepoistory : IBaseRepoistory<ResultDtoData>
+    public interface IPowerRepoistory : IBaseRepoistory<PowerData>
     {
         /// <summary>
         /// 菜单级联选择器绑定

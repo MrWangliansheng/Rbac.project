@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Rbac.project.Domain;
+using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.Domain.Enum;
 using Rbac.project.IRepoistory;
@@ -10,18 +12,50 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Rbac.project.Repoistorys
 {
-    public class PowerRepoistory:BaseRepoistory<ResultDtoData>,IPowerRepoistory
+    public class PowerRepoistory : BaseRepoistory<PowerData>, IPowerRepoistory
     {
         private readonly RbacDbContext db;
         private readonly ILogDataRepoistory logdata;
-        public PowerRepoistory(RbacDbContext db,ILogDataRepoistory logdata):base(db)
+        private readonly IMapper mapper;
+        public PowerRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper) : base(db)
         {
             this.logdata = logdata;
             this.db = db;
+            this.mapper = mapper;
         }
+        #region 权限菜单
+        /// <summary>
+        /// 添加权限菜单
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public override async Task<PowerData> InsertAsync(PowerData t)
+        {
+            var star = await db.Database.BeginTransactionAsync();
+            try
+            {
+
+                var pwdata = mapper.Map<Power>(t);
+                await db.AddAsync(pwdata);
+                logdata.CreateLog("/Repoistorys/InsertAsync", "添加权限菜单成功", "");
+                await db.SaveChangesAsync();
+
+                await star.CommitAsync();
+                return t;
+            }
+            catch (Exception ex)
+            {
+                await star.RollbackAsync();
+                logdata.CreateLog("/Repoistorys/InsertAsync", ex.Message, "");
+                return null;
+            }
+        }
+        #endregion
+
         #region 菜单级联绑定
         /// <summary>
         /// 权限菜单级联绑定
@@ -79,20 +113,20 @@ namespace Rbac.project.Repoistorys
 
         public async Task<ResultDtoData> GetPowerTreeTableLevelone(int id = 0)
         {
-            var list =await db.Power.Where(m => m.PowerIsDelete.Equals(false)&m.PowerParentId.Equals(id)).ToListAsync();
+            var list = await db.Power.Where(m => m.PowerIsDelete.Equals(false) & m.PowerParentId.Equals(id)).ToListAsync();
             foreach (var item in list)
             {
-                item.children =await GetPowerTreeSublevel(item.PowerId);
+                item.children = await GetPowerTreeSublevel(item.PowerId);
             }
 
-            return new ResultDtoData { Result=Result.Success,Message="数据查询成功",Data=list };
+            return new ResultDtoData { Result = Result.Success, Message = "数据查询成功", Data = list };
         }
         public async Task<List<Power>> GetPowerTreeSublevel(int id)
         {
             var list = await db.Power.Where(m => m.PowerIsDelete.Equals(false) & m.PowerParentId.Equals(id)).ToListAsync();
             foreach (var item in list)
             {
-                item.children =await GetPowerTreeSublevel(item.PowerId);
+                item.children = await GetPowerTreeSublevel(item.PowerId);
             }
             return list;
         }
@@ -116,7 +150,7 @@ namespace Rbac.project.Repoistorys
                     tree.children = GetPowerTreeDataSublevel(item.PowerId).Count > 0 ? GetPowerTreeDataSublevel(item.PowerId) : null;
                     treelist.Add(tree);
                 }
-                
+
                 logdata.CreateLog("/PowerRepoistory/GetPowerTreeData", "查询权限菜单成功", "");
                 return new ResultDtoData { Result = Result.Success, Message = "查询权限菜单成功", Data = treelist };
             }
@@ -125,7 +159,7 @@ namespace Rbac.project.Repoistorys
 
                 throw;
             }
-           
+
         }
 
         public List<TreeDto> GetPowerTreeDataSublevel(int id)
@@ -155,10 +189,10 @@ namespace Rbac.project.Repoistorys
                     name = item.ToString()
                 });
             }
-            return new ResultDtoData { Result=Result.Success,Message="权限菜单枚举列表查询成功",Data=list};
+            return new ResultDtoData { Result = Result.Success, Message = "权限菜单枚举列表查询成功", Data = list };
         }
 
-        
+
         #endregion
 
     }
