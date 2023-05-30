@@ -26,11 +26,10 @@ namespace Rbac.project.Service
             return t1;
         }
 
-        public virtual async Task<List<T1>> GetALL()
+        public virtual async Task<List<T>> GetALL(Expression<Func<T, bool>> predicate)
         {
             var list = await Idal.GetALL();
-            var list1 = mapper.Map<List<T1>>(list);
-            return list1;
+            return list;
         }
 
         public virtual async Task<List<T1>> GetPage(Expression<Func<T, bool>> predicate)

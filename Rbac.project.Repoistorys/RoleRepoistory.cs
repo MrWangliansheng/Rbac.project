@@ -124,6 +124,7 @@ namespace Rbac.project.Repoistorys
             catch (Exception ex)
             {
                 await tran.RollbackAsync();
+                logdata.CreateLog("/RoleRepoistory/LogicDeleteAsync", "删除角色异常:"+ex.Message, "");
                 return null;
             }
         }

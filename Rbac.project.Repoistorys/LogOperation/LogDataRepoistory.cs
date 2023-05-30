@@ -19,7 +19,7 @@ namespace Rbac.project.Repoistory.LogOperation
 
         public void CreateLog(string name, string message, string oper)
         {
-            var log=new LogData { LogName=name,LogMessage=message,Operator=oper};
+            var log=new LogData {LogDataId=0, LogName=name,LogMessage=message,Operator=oper};
             db.Add(log);
             db.SaveChanges();
         }

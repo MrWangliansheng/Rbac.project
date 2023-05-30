@@ -17,5 +17,6 @@ namespace Rbac.project.IService
         ResultDtoData ResetUserPasswrod(UserDto dto);
         Task<PageDto> GetUserInfoPage(UserDto dto);
 
+        ResultDtoData GetNewToken(string token);
     }
 }

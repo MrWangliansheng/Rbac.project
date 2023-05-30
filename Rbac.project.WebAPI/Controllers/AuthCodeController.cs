@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using System.IO;
 using CSRedis;
+using Lazy.Captcha.Core;
 
 namespace Rbac.project.WebAPI.Controllers
 {
@@ -16,16 +17,32 @@ namespace Rbac.project.WebAPI.Controllers
     public class AuthCodeController : ControllerBase
     {
         public readonly CSRedisClient cs;
-        public AuthCodeController(CSRedisClient cs)
+        public readonly ICaptcha cap;
+        public AuthCodeController(CSRedisClient cs, ICaptcha cap)
         {
             this.cs = cs;
+            this.cap = cap;
         }
-
+        /// <summary>
+        /// 获取验证码
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns></returns>
         [HttpGet("UserCode")]
         public IActionResult UserCode(string guid)
         {
+            var info = cap.Generate(guid);
+            var stream = new MemoryStream(info.Bytes);
+            cs.SetAsync(guid, info.Code, new TimeSpan(TimeSpan.TicksPerMinute)).Wait();
+            return File(stream, "image/gif");
+        }
+
+        [HttpGet("GetCode")]
+        public IActionResult GetCode(string guid)
+        {
             var code = CreateCharCode(4);
-            cs.SetAsync(guid, code).Wait();
+            var time = new TimeSpan(TimeSpan.TicksPerMinute);
+            cs.SetAsync(guid, code, new TimeSpan(TimeSpan.TicksPerMinute)).Wait();
             var autncode = CreateVerifyCode(code, 4);
             return File(autncode, "image/jpg");
         }

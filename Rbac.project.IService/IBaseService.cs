@@ -8,7 +8,7 @@ namespace Rbac.project.IService
 {
     public interface IBaseService<T,T1> where T : class where T1 : class
     {
-        Task<List<T1>> GetALL();
+        Task<List<T>> GetALL(Expression<Func<T, bool>> predicate);
 
         Task<T1> InsertAsync(T t);
 

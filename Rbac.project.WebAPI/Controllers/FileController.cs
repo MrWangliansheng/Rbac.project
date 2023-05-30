@@ -9,7 +9,6 @@ namespace Rbac.project.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class FileController : ControllerBase
     {
         [HttpPost("ImgUp")]

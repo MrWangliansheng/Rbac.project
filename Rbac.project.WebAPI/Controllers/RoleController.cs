@@ -82,14 +82,6 @@ namespace Rbac.project.WebAPI.Controllers
         {
             var role =await bll.LogicDeleteAsync(id);
             return role;
-            //if (role.RoleIsDelete)
-            //{
-            //    return new ResultDto { Result = Result.Success, Message = "删除成功" };
-            //}
-            //else
-            //{
-            //    return new ResultDto { Result = Result.Success, Message = "删除失败" };
-            //}
         }
     }
 }

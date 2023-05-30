@@ -15,6 +15,7 @@ using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Rbac.project.Repoistorys.AutoMapper;
 using Rbac.project.Domain.DataDisplay;
+using Rbac.project.IRepoistory.LogOperation;
 
 namespace Rbac.project.Repoistorys
 {
@@ -22,10 +23,12 @@ namespace Rbac.project.Repoistorys
     {
         private readonly RbacDbContext db;
         private readonly IMapper mapper;
-        public UserRepoistory(RbacDbContext db, IMapper mapper) : base(db)
+        private readonly ILogDataRepoistory logdata;
+        public UserRepoistory(RbacDbContext db, IMapper mapper, ILogDataRepoistory logdata) : base(db)
         {
             this.mapper = mapper;
             this.db = db;
+            this.logdata = logdata;
         }
         /// <summary>
         /// 用户登录
@@ -51,9 +54,14 @@ namespace Rbac.project.Repoistorys
             var i = db.SaveChanges();
             return i;
         }
-
+        /// <summary>
+        /// 添加用户信息
+        /// </summary>
+        /// <param name="User"></param>
+        /// <returns></returns>
         public override async Task<UserData> InsertAsync(UserData User)
         {
+            var tran = db.Database.BeginTransaction();
             try
             {
                 var list = await db.Set<User>().Where(m => m.UserName.Equals(User.UserName)).ToListAsync();
@@ -64,9 +72,11 @@ namespace Rbac.project.Repoistorys
                 }
                 else
                 {
+                    //数据映射
                     var user = mapper.Map<User>(User);
-                    await db.AddAsync(user);
-                    await db.SaveChangesAsync();
+                    await db.AddAsync(user);//上下文异步添加用户信息
+                    await db.SaveChangesAsync();//保存更改
+                    //添加用户角色中间表数据
                     foreach (var item in User.RoleId)
                     {
                         var userrole = new UserRole();
@@ -75,12 +85,19 @@ namespace Rbac.project.Repoistorys
                         await db.AddAsync(userrole);
                         await db.SaveChangesAsync();
                     }
+                    //添加日志表数据
+                    logdata.CreateLog("/UserRepoistory/InsertAsync", "添加用户信息", " ");
+                    //提交事务
+                    tran.Commit();
                     return mapper.Map<UserData>(user);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                //出现异常后事务回滚，不做任何更改
+                tran.Rollback();
+                //添加错误信息到日志表数据
+                logdata.CreateLog("/UserRepoistory/InsertAsync", ex.Message, "");
                 return null;
             }
 
@@ -148,11 +165,11 @@ namespace Rbac.project.Repoistorys
             }
             catch (Exception ex)
             {
-                var log = new LogData { LogName= "/UserRepoistory/FindAsync",LogMessage=ex.Message,Operator="" };
+                var log = new LogData { LogName = "/UserRepoistory/FindAsync", LogMessage = ex.Message, Operator = "" };
                 db.Add(log);
                 return null;
             }
-            
+
         }
         /// <summary>
         /// 重写修改用户信息
@@ -173,17 +190,23 @@ namespace Rbac.project.Repoistorys
                     if (i > 0)
                     {
                         var userrolelist = db.UserRole.Where(m => m.UserID.Equals(user.UserId)).ToList();
-                        db.RemoveRange(userrolelist);
-                        if (user.RoleId!=null)
+                        var listid = new List<int>();
+                        foreach (var item in userrolelist)
                         {
+                            listid.Add(item.RoleID);
+                        }
+                        var uslist = new List<UserRole>();
+                        if (user.RoleId != null)
+                        {
+                            db.RemoveRange(userrolelist);
                             foreach (var item in user.RoleId)
                             {
                                 var userrole = new UserRole();
                                 userrole.RoleID = item;
                                 userrole.UserID = data.UserId;
-                                userrolelist.Add(userrole);
+                                uslist.Add(userrole);
                             }
-                            db.AddRange(userrolelist);
+                            db.AddRange(uslist);
                             db.SaveChanges();
                         }
                         #region 添加日志信息
@@ -203,7 +226,7 @@ namespace Rbac.project.Repoistorys
                     use = db.User.Where(m => m.UserName.Equals(user.UserName)).ToList().FirstOrDefault();
                     if (use != null)
                     {
-                        user.UserId = -1;
+                        user.UserId = -1;//用户名已存在
                         return user;
                     }
                     var data = mapper.Map(user, use);
@@ -221,14 +244,14 @@ namespace Rbac.project.Repoistorys
                         return user;
                     }
                 }
-                
+
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
                 var log = new LogData { LogName = "/UserRepoistory/Update", LogMessage = ex.Message, Operator = "" };
-                user.UserId = -1;
-                return user;
+                //user.UserId = -1;
+                return null;//出现异常
             }
 
         }

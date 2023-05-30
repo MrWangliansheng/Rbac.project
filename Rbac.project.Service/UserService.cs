@@ -17,14 +17,15 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using IdentityModel;
 namespace Rbac.project.Service
 {
-    public class UserService : BaseService<UserData,ResultDtoData>, IUserService
+    public class UserService : BaseService<UserData, ResultDtoData>, IUserService
     {
         public readonly IUserRepoistory dal;
         public readonly IMapper mapper;
         public readonly IConfiguration configuration;
-        public UserService(IUserRepoistory dal, IMapper mapper,IConfiguration configuration) : base(dal, mapper)
+        public UserService(IUserRepoistory dal, IMapper mapper, IConfiguration configuration) : base(dal, mapper)
         {
             this.mapper = mapper;
             this.dal = dal;
@@ -68,7 +69,7 @@ namespace Rbac.project.Service
             try
             {
                 var i = dal.ResetUserPasswrod(dto.Id, dto.pwd);
-                if (i>0)
+                if (i > 0)
                 {
                     return new ResultDtoData { Result = Result.Success, Message = "重置密码成功" };
                 }
@@ -79,15 +80,15 @@ namespace Rbac.project.Service
             }
             catch (Exception ex)
             {
-                return new ResultDtoData {Result=Result.Error, Message = ex.Message };
+                return new ResultDtoData { Result = Result.Error, Message = ex.Message };
             }
         }
 
 
         public override async Task<ResultDtoData> FindAsync(int id)
         {
-            var user =await Idal.FindAsync(id);
-            if (user!=null)
+            var user = await Idal.FindAsync(id);
+            if (user != null)
             {
                 return new ResultDtoData { Result = Result.Success, Message = "", Data = user };
             }
@@ -106,16 +107,24 @@ namespace Rbac.project.Service
             try
             {
                 var use = dal.Update(user);
-                if (use.UserId > 0)
+                if (use != null)
                 {
-                    return new ResultDtoData { Result = Result.Success, Message = "修改用户信息成功", Data = use };
-                } else if (use.UserId == -1)
-                {
-                    return new ResultDtoData { Result = Result.Warning, Message = "用户名已存在无法修修改" };
+                    if (use.UserId > 0)
+                    {
+                        return new ResultDtoData { Result = Result.Success, Message = "修改用户信息成功", Data = use };
+                    }
+                    else if (use.UserId == -1)
+                    {
+                        return new ResultDtoData { Result = Result.Warning, Message = "用户名已存在无法修修改" };
+                    }
+                    else
+                    {
+                        return new ResultDtoData { Result = Result.Warning, Message = "修改用户信息失败" };
+                    }
                 }
                 else
                 {
-                    return new ResultDtoData { Result = Result.Warning, Message = "修改用户信息失败" };
+                    return new ResultDtoData { Result = Result.Error, Message = "修改用户出现异常详情请查看日志" };
                 }
             }
             catch (Exception ex)
@@ -150,16 +159,18 @@ namespace Rbac.project.Service
                                 Idal.Update(mapper.Map<UserData>(user));
                             }
                         }
+                        //生成Token
                         SecurityKey key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["Kestrel:key"]));
-                        IList<Claim> claims=new List<Claim> {
-                            new Claim(ClaimTypes.NameIdentifier,user.UserId.ToString()),
-                            new Claim(ClaimTypes.Name,user.UserName.ToString()),
-                            new Claim(ClaimTypes.Email,user.UserEmail.ToString())
+                        IList<Claim> claims = new List<Claim> {
+                            new Claim(JwtClaimTypes.Id,user.UserId.ToString()),
+                            new Claim(JwtClaimTypes.Name,user.UserName.ToString()),
+                            new Claim(JwtClaimTypes.Email,user.UserEmail.ToString()),
+                            new Claim(JwtClaimTypes.Audience,"audience")
                         };
                         SecurityToken token = new JwtSecurityToken(issuer: "issuer", audience: "audience", signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
-                            expires: DateTime.Now.AddDays(0.1),
+                            expires: DateTime.Now.AddSeconds(10),
                             claims: claims);
-                        return new ResultDto { Result = Result.Success, Message = "登陆成功",Key="Bearer "+new JwtSecurityTokenHandler().WriteToken(token) };
+                        return new ResultDto { Result = Result.Success, Message = "登陆成功", Key = "Bearer " + new JwtSecurityTokenHandler().WriteToken(token) };
                     }
                     else
                     {
@@ -173,9 +184,55 @@ namespace Rbac.project.Service
             }
             catch (Exception ex)
             {
-                return new ResultDto { Result=Result.Error, Message = ex.Message };
+                return new ResultDto { Result = Result.Error, Message = ex.Message };
             }
         }
 
+        /// <summary>
+        /// 添加用户信息
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public override async Task<ResultDtoData> InsertAsync(UserData data)
+        {
+
+            try
+            {
+                //var user=mapper.Map<User>(data);
+                var user = await Idal.InsertAsync(data);
+                if (user != null)
+                {
+                    return new ResultDtoData { Result = Result.Success, Message = "添加用户成功" };
+                }
+                else
+                {
+                    return new ResultDtoData { Result = Result.Error, Message = "添加用户异常详细请查看日志" };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ResultDtoData { Result = Result.Error, Message = "添加用户异常详细请查看日志" };
+            }
+        }
+
+        public ResultDtoData GetNewToken(string token)
+        {
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var payload = handler.ReadJwtToken(token).Payload;
+                SecurityKey key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["Kestrel:key"]));
+                IList<Claim> claims = payload.Claims.ToList();
+                SecurityToken newtoken = new JwtSecurityToken(issuer: "issuer", audience: "audience", signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
+                    expires: DateTime.Now.AddSeconds(10),
+                    claims: claims);
+                return new ResultDtoData { Result = Result.Success, Message = "Bearer " + new JwtSecurityTokenHandler().WriteToken(newtoken) };
+            }
+            catch (Exception)
+            {
+                return new ResultDtoData { Result = Result.Error };
+            }
+           
+        }
     }
 }
