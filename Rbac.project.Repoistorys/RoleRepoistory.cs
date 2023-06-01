@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Rbac.project.Domain;
+using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
+using Rbac.project.Domain.ParentIdAll;
 using Rbac.project.IRepoistory;
 using Rbac.project.IRepoistory.LogOperation;
 using Rbac.project.Repoistory.LogOperation;
@@ -14,14 +17,16 @@ using System.Threading.Tasks.Dataflow;
 
 namespace Rbac.project.Repoistorys
 {
-    public class RoleRepoistory : BaseRepoistory<Role>, IRoleRepoistory
+    public class RoleRepoistory : BaseRepoistory<RoleData>, IRoleRepoistory
     {
         private readonly RbacDbContext db;
         private readonly ILogDataRepoistory logdata;
-        public RoleRepoistory(RbacDbContext db, ILogDataRepoistory logdata) : base(db)
+        private readonly IMapper mapper;
+        public RoleRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper) : base(db)
         {
             this.db = db;
             this.logdata = logdata;
+            this.mapper = mapper;
         }
         #region 角色级联选择器绑定
         /// <summary>
@@ -87,27 +92,56 @@ namespace Rbac.project.Repoistorys
         /// <param name="t"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public override async Task<Role> InsertAsync(Role role)
+        public override async Task<RoleData> InsertAsync(RoleData role)
         {
-            var list = await db.Set<Role>().Where(m => m.RoleName.Equals(role.RoleName) && m.RoleParentId.Equals(role.RoleParentId)).ToListAsync();
-            if (list.Count > 0)
+            var tran = db.Database.BeginTransaction();
+            try
             {
-                role.RoleId = -1;
-                return role;
+                var list = await db.Set<Role>().Where(m => m.RoleName.Equals(role.RoleName) && m.RoleParentId.Equals(role.RoleParentId)).ToListAsync();
+                if (list.Count > 0)
+                {
+                    role.RoleId = -1;
+                    return role;
+                }
+                else
+                {
+                    var ro = mapper.Map<Role>(role);
+                    await db.Set<Role>().AddAsync(ro);
+                    await db.SaveChangesAsync();
+                    foreach (var item in role.PowerId)
+                    {
+                        var rolepower = new RolePower();
+                        rolepower.PowerID = item;
+                        rolepower.RoleID = ro.RoleId;
+                        await db.AddAsync(rolepower);
+                    }
+                    foreach (var item in role.PowerIdAll)
+                    {
+                        var idall = new RolePowerIdAll();
+                        idall.PowerIdAll = item;
+                        idall.RoleID = ro.RoleId;
+                        await db.AddAsync(idall);
+                    }
+                    await db.SaveChangesAsync();
+                    logdata.CreateLog("/RoleRepoistory/InsertAsync", "添加角色", "");
+                    tran.Commit();
+                    return mapper.Map<RoleData>(ro);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await db.Set<Role>().AddAsync(role);
-                await db.SaveChangesAsync();
-                return role;
+                tran.Rollback();
+                logdata.CreateLog("/RoleRepoistory/InsertAsync", ex.Message, "");
+                return null;
             }
+
         }
         /// <summary>
         /// 逻辑删除角色信息
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public override async Task<Role> LogicDeleteAsync(int id)
+        public override async Task<RoleData> LogicDeleteAsync(int id)
         {
             var tran = await db.Database.BeginTransactionAsync();
             try
@@ -119,23 +153,25 @@ namespace Rbac.project.Repoistorys
                 logdata.CreateLog("/RoleRepoistory/LogicDeleteAsync", "删除角色信息成功", "");
                 await db.SaveChangesAsync();
                 await tran.CommitAsync();
-                return role;
+                return mapper.Map<RoleData>(role);
             }
             catch (Exception ex)
             {
                 await tran.RollbackAsync();
-                logdata.CreateLog("/RoleRepoistory/LogicDeleteAsync", "删除角色异常:"+ex.Message, "");
+                logdata.CreateLog("/RoleRepoistory/LogicDeleteAsync", "删除角色异常:" + ex.Message, "");
                 return null;
             }
         }
+
         /// <summary>
-        /// 查询全部角色信息
+        /// 查询全部数据
         /// </summary>
+        /// <param name="predicate"></param>
         /// <returns></returns>
-        //public override Task<List<Role>> GetPage(Expression<Func<Role, bool>> predicate)
-        //{
-            
-        //    return base.GetPage(predicate);
-        //}
+        public override async Task<List<RoleData>> GetAll(Expression<Func<RoleData, bool>> predicate)
+        {
+            var role = mapper.Map<List<RoleData>>(await db.Role.ToListAsync());
+            return role.AsQueryable().Where(predicate).ToList();
+        }
     }
 }

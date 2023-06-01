@@ -62,8 +62,13 @@ namespace Rbac.project.Domain.DataDisplay
         /// </summary>
         public List<int> RoleId { get; set; }
         /// <summary>
+        /// 全部角色ID
+        /// </summary>
+        public List<string> RoleIdAll { get; set; }
+        /// <summary>
         /// 用户状态
         /// </summary>
         public bool UserState { get; set; }
+
     }
 }

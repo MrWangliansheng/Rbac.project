@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rbac.project.Repoistorys;
 
 namespace Rbac.project.WebAPI.Migrations
 {
     [DbContext(typeof(RbacDbContext))]
-    partial class RbacDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230531021603_添加用户角色全部ID表")]
+    partial class 添加用户角色全部ID表
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,42 +45,6 @@ namespace Rbac.project.WebAPI.Migrations
                     b.ToTable("LogData");
                 });
 
-            modelBuilder.Entity("Rbac.project.Domain.ParentIdAll.RolePowerIdAll", b =>
-                {
-                    b.Property<int>("RolePowerIdAllId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("PowerIdAll")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RoleID")
-                        .HasColumnType("int");
-
-                    b.HasKey("RolePowerIdAllId");
-
-                    b.ToTable("RolePowerIdAll");
-                });
-
-            modelBuilder.Entity("Rbac.project.Domain.ParentIdAll.UserRoleIdAll", b =>
-                {
-                    b.Property<int>("URAID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("RoleIdAll")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("URAID");
-
-                    b.ToTable("UserRoleIdAll");
-                });
-
             modelBuilder.Entity("Rbac.project.Domain.Power", b =>
                 {
                     b.Property<int>("PowerId")
@@ -107,13 +73,7 @@ namespace Rbac.project.WebAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("PowerAPIUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PowerDesc")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PowerIcon")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PowerIsDelete")
@@ -129,9 +89,6 @@ namespace Rbac.project.WebAPI.Migrations
                     b.Property<string>("PowerParentIdAll")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PowerRedirect")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PowerRoute")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -141,10 +98,6 @@ namespace Rbac.project.WebAPI.Migrations
 
                     b.Property<int>("PowerType")
                         .HasColumnType("int");
-
-                    b.Property<string>("RouteName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("PowerId");
 

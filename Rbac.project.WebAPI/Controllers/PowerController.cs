@@ -53,11 +53,43 @@ namespace Rbac.project.WebAPI.Controllers
         /// 权限菜单级联绑定
         /// </summary>
         /// <returns></returns>
-        //[HttpGet("CreatePower")]
-        //public async Task<ResultDtoData> CreatePower(PowerData power)
-        //{
-        //    var t= await bll.InsertAsync(power);
-        //    return 
-        //}
+        [HttpPost("CreatePower")]
+        public async Task<ResultDtoData> CreatePower(PowerData power)
+        {
+            var t = await bll.InsertAsync(power);
+            return t;
+        }
+        /// <summary>
+        /// 添加子菜单使用查询所有父级菜单
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("GetPar")]
+        public async Task<IActionResult> GetPar(int id)
+        {
+            return Ok(await bll.GetPar(id));
+        }
+        /// <summary>
+        /// 菜单修改信息回显
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("EditPower")]
+        public async Task<IActionResult> EditPower(int id)
+        {
+            var result =await bll.FindAsync(id);
+            return Ok(result);
+        }
+        /// <summary>
+        /// 修改菜单信息
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        [HttpPut("UpdatePower")]
+        public IActionResult UpdatePower(PowerData data)
+        {
+            var rulest = bll.Update(data);
+            return Ok(rulest);
+        }
     }
 }

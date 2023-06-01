@@ -165,7 +165,6 @@ namespace Rbac.project.Service
                             new Claim(JwtClaimTypes.Id,user.UserId.ToString()),
                             new Claim(JwtClaimTypes.Name,user.UserName.ToString()),
                             new Claim(JwtClaimTypes.Email,user.UserEmail.ToString()),
-                            new Claim(JwtClaimTypes.Audience,"audience")
                         };
                         SecurityToken token = new JwtSecurityToken(issuer: "issuer", audience: "audience", signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
                             expires: DateTime.Now.AddSeconds(10),
@@ -222,11 +221,11 @@ namespace Rbac.project.Service
                 var handler = new JwtSecurityTokenHandler();
                 var payload = handler.ReadJwtToken(token).Payload;
                 SecurityKey key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["Kestrel:key"]));
-                IList<Claim> claims = payload.Claims.ToList();
-                SecurityToken newtoken = new JwtSecurityToken(issuer: "issuer", audience: "audience", signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
+                IList<Claim> claims = payload.Claims.Where(m=>m.Type!="and").ToList();
+                SecurityToken newtoken = new JwtSecurityToken( signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
                     expires: DateTime.Now.AddSeconds(10),
                     claims: claims);
-                return new ResultDtoData { Result = Result.Success, Message = "Bearer " + new JwtSecurityTokenHandler().WriteToken(newtoken) };
+                return new ResultDtoData { Result = Result.Success, Key = "Bearer " + new JwtSecurityTokenHandler().WriteToken(newtoken) };
             }
             catch (Exception)
             {

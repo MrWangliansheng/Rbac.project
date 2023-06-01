@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Rbac.project.Domain;
+using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.IService;
 using System.Diagnostics.Eventing.Reader;
@@ -18,17 +19,17 @@ namespace Rbac.project.WebAPI.Controllers
     {
         public readonly CSRedisClient cs;
         public readonly IRoleService bll;
-        public RoleController(IRoleService bll,CSRedisClient cs)
+        public RoleController(IRoleService bll, CSRedisClient cs)
         {
             this.cs = cs;
             this.bll = bll;
         }
 
         [HttpGet("GetRedis")]
-        public async Task<IActionResult> GetRedis(string id="aslkdjaoslkdjokasjndk")
+        public async Task<IActionResult> GetRedis(string id = "aslkdjaoslkdjokasjndk")
         {
-            cs.SetAsync("aaa",id).Wait();
-            var aa =await cs.GetAsync("aaa");
+            cs.SetAsync("aaa", id).Wait();
+            var aa = await cs.GetAsync("aaa");
             return Ok(aa);
         }
         /// <summary>
@@ -36,7 +37,7 @@ namespace Rbac.project.WebAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("GetRole")]
-        public async Task<IActionResult> GetRole([FromQuery]RoleDto dto)
+        public async Task<IActionResult> GetRole([FromQuery] RoleDto dto)
         {
             return Ok(await bll.GetRolePage(dto));
         }
@@ -46,21 +47,10 @@ namespace Rbac.project.WebAPI.Controllers
         /// <param name="role"></param>
         /// <returns></returns>
         [HttpPost("CreateRole")]
-        public async Task<IActionResult> CreateRole(Role role)
+        public async Task<IActionResult> CreateRole(RoleData role)
         {
-            await bll.InsertAsync(role);
-            if (role.RoleId>0)
-            {
-                return Ok(new ResultDtoData { Result = Result.Success, Message = "添加成功" });
-            }
-            else if(role.RoleId ==-1) 
-            {
-                return Ok(new ResultDtoData { Result = Result.Success, Message = "角色已存在" ,Data=role});
-            }
-            else
-            {
-                return Ok(new ResultDtoData { Result = Result.Success, Message = "添加失败" });
-            }
+            var data = await bll.InsertAsync(role);
+            return Ok(data);
         }
         /// <summary>
         /// 角色级联绑定
@@ -69,7 +59,7 @@ namespace Rbac.project.WebAPI.Controllers
         [HttpGet("GetRoleTree")]
         public IActionResult GetRoleTree()
         {
-            var list=bll.GetRoleTree();
+            var list = bll.GetRoleTree();
             return Ok(list);
         }
         /// <summary>
@@ -80,8 +70,9 @@ namespace Rbac.project.WebAPI.Controllers
         [HttpDelete("LogicDeleteAsyncRole")]
         public async Task<ResultDto> LogicDeleteAsyncRole(int id)
         {
-            var role =await bll.LogicDeleteAsync(id);
+            var role = await bll.LogicDeleteAsync(id);
             return role;
         }
+
     }
 }

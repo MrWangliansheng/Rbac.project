@@ -18,12 +18,10 @@ namespace Rbac.project.Domain.DataDisplay
         /// <summary>
         /// 权限名称
         /// </summary>
-        [StringLength(50)]
         public string PowerName { get; set; }
         /// <summary>
         /// 权限路由
         /// </summary>
-        [StringLength(50)]
         public string PowerRoute { get; set; }
         /// <summary>
         /// 菜单上级ID
@@ -33,7 +31,7 @@ namespace Rbac.project.Domain.DataDisplay
         /// <summary>
         /// 全部上级ID
         /// </summary>
-        public string PowerParentIdAll { get; set; }
+        public string? PowerParentIdAll { get; set; }
         /// <summary>
         /// 权限菜单类型
         /// </summary>
@@ -43,5 +41,21 @@ namespace Rbac.project.Domain.DataDisplay
         /// 菜单描述
         /// </summary>
         public string PowerDesc { get; set; }
+        /// <summary>
+        /// 接口Url
+        /// </summary>
+        public string? PowerAPIUrl { get; set; }
+        /// <summary>
+        /// 菜单图标
+        /// </summary>
+        public string PowerIcon { get; set; }
+        /// <summary>
+        /// 是否删除
+        /// </summary>
+        public bool PowerIsDelete { get; set; }
+        /// <summary>
+        /// 重定向路由
+        /// </summary>
+        public string PowerRedirect { get; set; }
     }
 }

@@ -21,5 +21,7 @@ namespace Rbac.project.IService
 
         ResultDtoData GetPowerEnum();
         ResultDtoData GetPowerTreeData();
+
+        Task<ResultDtoData> GetPar(int id);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Rbac.project.Domain;
+using Rbac.project.Domain.ParentIdAll;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,13 @@ namespace Rbac.project.Repoistorys
         /// 日志信息表
         /// </summary>
         public DbSet<LogData> LogData { get; set; }
-        
+        /// <summary>
+        /// 用户角色全部ID
+        /// </summary>
+        public  DbSet<UserRoleIdAll> UserRoleIdAll { get; set;}
+        /// <summary>
+        /// 角色菜单全部ID
+        /// </summary>
+        public DbSet<RolePowerIdAll> RolePowerIdAll { get; set;}
     }
 }

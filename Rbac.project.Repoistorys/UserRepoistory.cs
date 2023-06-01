@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Rbac.project.Repoistorys.AutoMapper;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.IRepoistory.LogOperation;
+using Rbac.project.Domain.ParentIdAll;
 
 namespace Rbac.project.Repoistorys
 {
@@ -83,8 +84,16 @@ namespace Rbac.project.Repoistorys
                         userrole.RoleID = item;
                         userrole.UserID = user.UserId;
                         await db.AddAsync(userrole);
-                        await db.SaveChangesAsync();
                     }
+                    //添加用户角色全部ID表数据用于反填
+                    foreach (var item in User.RoleIdAll)
+                    {
+                        var uria = new UserRoleIdAll();
+                        uria.UserId = user.UserId;
+                        uria.RoleIdAll = item;
+                        await db.AddAsync(uria);
+                    }
+                    await db.SaveChangesAsync();
                     //添加日志表数据
                     logdata.CreateLog("/UserRepoistory/InsertAsync", "添加用户信息", " ");
                     //提交事务
@@ -160,7 +169,14 @@ namespace Rbac.project.Repoistorys
                 {
                     roleid.Add(item.RoleID);
                 }
+                var userroleidall = db.UserRoleIdAll.Where(m => m.UserId.Equals(id)).ToList();
+                List<string> roleidall=new List<string>();
+                foreach (var item in userroleidall)
+                {
+                    roleidall.Add(item.RoleIdAll);
+                }
                 userdata.RoleId = roleid;
+                userdata.RoleIdAll = roleidall;
                 return userdata;
             }
             catch (Exception ex)

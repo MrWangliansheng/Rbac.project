@@ -15,7 +15,8 @@ namespace Rbac.project.Repoistorys.AutoMapper
         public AutoMapperProfile()
         {
             CreateMap<User, UserData>().ReverseMap();
-            //CreateMap<UserData, User>();
+            CreateMap<RoleData, Role>().ReverseMap();
+            CreateMap<Power,PowerData>().ReverseMap();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Rbac.project.Domain;
+using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.IRepoistory;
 using Rbac.project.IRepoistory.LogOperation;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Rbac.project.Service
 {
-    public class RoleService : BaseService<Role, ResultDtoData>, IRoleService
+    public class RoleService : BaseService<RoleData, ResultDtoData>, IRoleService
     {
         private readonly IRoleRepoistory dal;
         private readonly IMapper mapper;
@@ -54,32 +55,44 @@ namespace Rbac.project.Service
                 return new PageDto { Result = Result.Error,Message=ex.Message};
             }
         }
-
+        /// <summary>
+        /// 查询角色树
+        /// </summary>
+        /// <returns></returns>
         public ResultDtoData GetRoleTree()
         {
             return dal.GetRoleTree();
         }
-
+        /// <summary>
+        /// 逻辑删除角色
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public override async Task<ResultDtoData> LogicDeleteAsync(int id)
         {
             var role = await Idal.LogicDeleteAsync(id);
-            if (role != null)
+            return new ResultDtoData { Result = Result.Success, Message = "删除成功" };
+        }
+        /// <summary>
+        /// 添加角色信息
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public override async Task<ResultDtoData> InsertAsync(RoleData t)
+        {
+            var role=await Idal.InsertAsync(t);
+            if (role==null)
             {
-                if (role.RoleIsDelete == true)
-                {
-                    return new ResultDtoData { Result = Result.Success, Message = "删除成功" };
-                }
-                else
-                {
-                    return new ResultDtoData { Result = Result.Warning, Message = "删除失败" };
-                }
+                return new ResultDtoData { Result = Result.Error, Message = "添加角色异常详情请联系管理员" };
+            }
+            else if(role.RoleId>0)
+            {
+                return new ResultDtoData { Result = Result.Success, Message = "添加角色成功" };
             }
             else
             {
-                return new ResultDtoData { Result = Result.Error, Message = "删除出现异常请联系管理员" };
+                return new ResultDtoData { Result = Result.Warning, Message = "角色已重复" };
             }
         }
-
-        
     }
 }

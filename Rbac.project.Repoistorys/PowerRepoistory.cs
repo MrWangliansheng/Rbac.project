@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Rbac.project.Domain;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
@@ -8,7 +9,9 @@ using Rbac.project.IRepoistory;
 using Rbac.project.IRepoistory.LogOperation;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,7 +41,12 @@ namespace Rbac.project.Repoistorys
             var star = await db.Database.BeginTransactionAsync();
             try
             {
-
+                var power = db.Power.Where(m => m.PowerParentId.Equals(t.PowerParentId) & m.PowerName.Equals(t.PowerName)).ToList(); 
+                if(power.Count>0)
+                {
+                    t.PowerId = -1;
+                    return t;
+                }
                 var pwdata = mapper.Map<Power>(t);
                 await db.AddAsync(pwdata);
                 logdata.CreateLog("/Repoistorys/InsertAsync", "添加权限菜单成功", "");
@@ -51,6 +59,60 @@ namespace Rbac.project.Repoistorys
             {
                 await star.RollbackAsync();
                 logdata.CreateLog("/Repoistorys/InsertAsync", ex.Message, "");
+                return null;
+            }
+        }
+        /// <summary>
+        /// 反填权限菜单信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public override async Task<PowerData> FindAsync(int id)
+        {
+            try
+            {
+                var power = await db.Power.FindAsync(id);
+                var data= mapper.Map<PowerData>(power);
+                logdata.CreateLog("/PowerRopeistory/FindAsync","反填菜单信息","");
+                return data;
+            }
+            catch (Exception ex)
+            {
+                logdata.CreateLog("/PowerRopeistory/FindAsync", ex.Message, "");
+                return null;
+            }
+            
+        }
+        /// <summary>
+        /// 修改菜单信息
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public override PowerData Update(PowerData t)
+        {
+            var tran=db.Database.BeginTransaction();
+            try
+            {
+                var list = db.Power.Where(m => m.PowerParentId.Equals(t.PowerParentId) & m.PowerName.Equals(t.PowerName)).ToList();
+                if (list.Count>0)
+                {
+                    t.PowerId = -1;
+                    return t;
+                }
+                else
+                {
+                    var power= mapper.Map<Power>(t);
+                    db.Update(power);
+                    db.SaveChanges();
+                    logdata.CreateLog("/PowerRepoistory/Update","修改菜单信息","");
+                    tran.Commit();
+                    return t;
+                }
+            }
+            catch (Exception ex)
+            {
+                tran.Rollback();
+                logdata.CreateLog("/PowerRepoistory/Update", ex.Message, "");
                 return null;
             }
         }
@@ -183,16 +245,21 @@ namespace Rbac.project.Repoistorys
             var list = new List<object>();
             foreach (var item in Enum.GetValues<PowerEnum>())
             {
+                var obj = (DescriptionAttribute)item.GetType().GetField(item.ToString()).GetCustomAttributes(typeof(DescriptionAttribute),false)[0];
                 list.Add(new
                 {
                     id = item,
-                    name = item.ToString()
+                    name = obj.Description
                 });
             }
             return new ResultDtoData { Result = Result.Success, Message = "权限菜单枚举列表查询成功", Data = list };
         }
 
-
+        public override async Task<List<PowerData>> GetALL()
+        {
+            var parlist =await db.Power.ToListAsync();
+            return mapper.Map<List<PowerData>>(parlist);
+        }
         #endregion
 
     }
