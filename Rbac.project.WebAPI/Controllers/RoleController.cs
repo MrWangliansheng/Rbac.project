@@ -73,6 +73,39 @@ namespace Rbac.project.WebAPI.Controllers
             var role = await bll.LogicDeleteAsync(id);
             return role;
         }
-
+        /// <summary>
+        /// 回显角色修改信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("EditRole")]
+        public async Task<ResultDtoData> EditRole(int id)
+        {
+            var role=await bll.FindAsync(id);
+            return role;
+        }
+        /// <summary>
+        /// 修改角色信息
+        /// </summary>
+        /// <param name="role"></param>
+        /// <returns></returns>
+        [HttpPut("UpdateRole")]
+        public ResultDtoData UpdateRole(RoleData role)
+        {
+            var result = bll.Update(role);
+            return result;
+        }
+        /// <summary>
+        /// 查询角色名称是否重复
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet("GetRoleName")]
+        public ResultDto GetRoleName(int id,string name)
+        {
+            var dto=bll.GetRoleName(id,name);
+            return dto;
+        }
     }
 }

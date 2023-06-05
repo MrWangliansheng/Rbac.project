@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Rbac.project.Domain;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.Domain.ParentIdAll;
 using Rbac.project.IRepoistory;
-using Rbac.project.IRepoistory.LogOperation;
-using Rbac.project.Repoistory.LogOperation;
+using Rbac.project.IRepoistory.Eextend;
+using Rbac.project.Repoistory.Eextend;
+using Rbac.project.Repoistorys.AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,11 +25,15 @@ namespace Rbac.project.Repoistorys
         private readonly RbacDbContext db;
         private readonly ILogDataRepoistory logdata;
         private readonly IMapper mapper;
-        public RoleRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper) : base(db)
+        private readonly IReflectRepoistory<Role> reflect;
+        private readonly IHttpContextAccessor http;
+        public RoleRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper, IReflectRepoistory<Role> reflect,IHttpContextAccessor http) : base(db)
         {
             this.db = db;
             this.logdata = logdata;
             this.mapper = mapper;
+            this.reflect = reflect;
+            this.http = http;
         }
         #region 角色级联选择器绑定
         /// <summary>
@@ -95,6 +102,7 @@ namespace Rbac.project.Repoistorys
         public override async Task<RoleData> InsertAsync(RoleData role)
         {
             var tran = db.Database.BeginTransaction();
+            string name = http.HttpContext.User.Claims.Where(m => m.Type == "name").FirstOrDefault().Value;
             try
             {
                 var list = await db.Set<Role>().Where(m => m.RoleName.Equals(role.RoleName) && m.RoleParentId.Equals(role.RoleParentId)).ToListAsync();
@@ -123,7 +131,8 @@ namespace Rbac.project.Repoistorys
                         await db.AddAsync(idall);
                     }
                     await db.SaveChangesAsync();
-                    logdata.CreateLog("/RoleRepoistory/InsertAsync", "添加角色", "");
+                    logdata.CreateLog("/RoleRepoistory/InsertAsync", "添加角色", name);
+                    reflect.CreateAudit(ro, name);
                     tran.Commit();
                     return mapper.Map<RoleData>(ro);
                 }
@@ -131,7 +140,7 @@ namespace Rbac.project.Repoistorys
             catch (Exception ex)
             {
                 tran.Rollback();
-                logdata.CreateLog("/RoleRepoistory/InsertAsync", ex.Message, "");
+                logdata.CreateLog("/RoleRepoistory/InsertAsync", ex.Message, name);
                 return null;
             }
 
@@ -144,21 +153,23 @@ namespace Rbac.project.Repoistorys
         public override async Task<RoleData> LogicDeleteAsync(int id)
         {
             var tran = await db.Database.BeginTransactionAsync();
+            string name = http.HttpContext.User.Claims.Where(m => m.Type == "name").FirstOrDefault().Value;
             try
             {
                 var role = await db.Role.FindAsync(id);
 
                 role.RoleIsDelete = true;
                 db.Update(role);
-                logdata.CreateLog("/RoleRepoistory/LogicDeleteAsync", "删除角色信息成功", "");
+                logdata.CreateLog("/RoleRepoistory/LogicDeleteAsync", "删除角色信息成功", name);
                 await db.SaveChangesAsync();
+                reflect.DeleteAudit(role, name);
                 await tran.CommitAsync();
                 return mapper.Map<RoleData>(role);
             }
             catch (Exception ex)
             {
                 await tran.RollbackAsync();
-                logdata.CreateLog("/RoleRepoistory/LogicDeleteAsync", "删除角色异常:" + ex.Message, "");
+                logdata.CreateLog("/RoleRepoistory/LogicDeleteAsync", "删除角色异常:" + ex.Message, name);
                 return null;
             }
         }
@@ -172,6 +183,155 @@ namespace Rbac.project.Repoistorys
         {
             var role = mapper.Map<List<RoleData>>(await db.Role.ToListAsync());
             return role.AsQueryable().Where(predicate).ToList();
+        }
+        /// <summary>
+        /// 角色信息反填
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public override async Task<RoleData> FindAsync(int id)
+        {
+            string name = http.HttpContext.User.Claims.Where(m => m.Type == "name").FirstOrDefault().Value;
+            try
+            {
+                var role = await db.Role.FindAsync(id);
+                List<int> paridall=new List<int>();
+                var paridlist=db.RolePower.Where(m=>m.RoleID==id).ToList();
+                foreach (var item in paridlist)
+                {
+                    paridall.Add(item.PowerID);
+                }
+                var idalllist=db.RolePowerIdAll.Where(m=>m.RoleID == id).ToList();
+                List<string> powidall = new List<string>();
+                foreach (var item in idalllist)
+                {
+                    powidall.Add(item.PowerIdAll);
+                }
+                var data= mapper.Map<RoleData>(role);
+                data.PowerIdAll = powidall;
+                return data;
+            }
+            catch (Exception ex)
+            {
+                logdata.CreateLog("/RoleRepoistory/FindAsync", ex.Message, name);
+                return null;
+            }
+           
+        }
+        /// <summary>
+        /// 修改角色信息
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public override RoleData Update(RoleData t)
+        {
+            var tran=db.Database.BeginTransaction();
+            string name = http.HttpContext.User.Claims.Where(m => m.Type == "name").FirstOrDefault().Value;
+            try
+            {
+                var role = db.Role.Where(m => m.RoleId.Equals(t.RoleId) && m.RoleName.Equals(t.RoleName)).FirstOrDefault();
+                if (role != null)
+                {
+                    mapper.Map(t,role);
+                    db.Update(role);
+                    db.SaveChanges();
+                    var powerlist = db.RolePower.Where(m => m.RoleID.Equals(t.RoleId)).ToList();
+                    var poweridall = db.RolePowerIdAll.Where(m => m.RoleID.Equals(t.RoleId)).ToList();
+                    db.RemoveRange(powerlist);
+                    db.RemoveRange( poweridall);
+
+                    foreach (var item in t.PowerIdAll)
+                    {
+                        var rp = new RolePowerIdAll();
+                        rp.RoleID = role.RoleId;
+                        rp.PowerIdAll = item;
+                        db.Add(rp);
+                    }
+                    foreach (var item in t.PowerId)
+                    {
+                        var rolepower = new RolePower();
+                        rolepower.RoleID = role.RoleId;
+                        rolepower.PowerID = item;
+                        db.Add(rolepower);
+                    }
+                    db.SaveChanges();
+                    logdata.CreateLog("/RoleRepoistory/Update", "修改角色信息", name);
+                    reflect.UpdateAudit(role, name);
+                    tran.Commit();
+                    return mapper.Map(role, t);
+                }
+                else
+                {
+                    role = db.Role.Where(m=>m.RoleParentId.Equals(t.RoleParentId)&&m.RoleName.Equals(t.RoleName)).FirstOrDefault();
+                    if (role!=null)
+                    {
+                        role.RoleId = -1;
+                        return mapper.Map(role, t);
+                    }
+                    else
+                    {
+                        mapper.Map(t, role);
+                        db.Update(role);
+                        db.SaveChanges();
+                        var powerlist = db.RolePower.Where(m => m.RoleID.Equals(t.RoleId)).ToList();
+                        var poweridall = db.RolePowerIdAll.Where(m => m.RoleID.Equals(t.RoleId)).ToList();
+                        db.RemoveRange(powerlist);
+                        db.RemoveRange(poweridall);
+
+                        foreach (var item in t.PowerIdAll)
+                        {
+                            var rp = new RolePowerIdAll();
+                            rp.RoleID = role.RoleId;
+                            rp.PowerIdAll = item;
+                            db.Add(rp);
+                        }
+                        foreach (var item in t.PowerId)
+                        {
+                            var rolepower = new RolePower();
+                            rolepower.RoleID = role.RoleId;
+                            rolepower.PowerID = item;
+                            db.Add(rolepower);
+                        }
+                        db.SaveChanges();
+                        logdata.CreateLog("/RoleRepoistory/Update", "修改角色信息", name);
+                        reflect.UpdateAudit(role, name);
+                        tran.Commit();
+                        return mapper.Map(role, t);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                tran.Rollback();
+                logdata.CreateLog("/RoleRepoistory/Update", ex.Message, name);
+                return null;
+            }
+        }
+        /// <summary>
+        /// 查询角色名称是否重复
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public ResultDto GetRoleName(int id, string name)
+        {
+            var role = db.Role.Where(m => m.RoleParentId.Equals(id) && m.RoleName.Equals(name)).ToList().FirstOrDefault();
+            if (role!=null)
+            {
+                return new ResultDto { Result = Result.Success };
+            }
+            else
+            {
+                role = db.Role.Where(m => m.RoleName.Equals(name)).FirstOrDefault();
+                if (role!=null)
+                {
+                    return new ResultDto { Result = Result.Warning ,Message="角色已存在"};
+                }
+                else
+                {
+                    return new ResultDto { Result = Result.Success };
+                }
+            }
         }
     }
 }

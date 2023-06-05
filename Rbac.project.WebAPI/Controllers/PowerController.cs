@@ -91,5 +91,16 @@ namespace Rbac.project.WebAPI.Controllers
             var rulest = bll.Update(data);
             return Ok(rulest);
         }
+        /// <summary>
+        /// 删除菜单信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete("DeletePower")]
+        public async Task<ResultDtoData> DeletePower(int id)
+        {
+            var power = await bll.LogicDeleteAsync(id);
+            return power;
+        }
     }
 }

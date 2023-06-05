@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -15,21 +16,25 @@ namespace Rbac.project.Domain
         /// <summary>
         /// 用户名称
         /// </summary>
+        [DisplayName("用户名")]
         [StringLength(50)]
         public string UserName { get; set; }
         /// <summary>
         /// 用户密码
         /// </summary>
+        [DisplayName("用户密码")]
         [StringLength (50)]
         public string UserPassword { get; set; }
         /// <summary>
         /// 用户邮箱
         /// </summary>
+        [DisplayName("用户邮箱")]
         [StringLength(100)]
         public string UserEmail { get; set; }
         /// <summary>
         /// 用户头像
         /// </summary>
+        [DisplayName("用户头像")]
         [StringLength(400)]
         public string UserImg { get; set; }
         /// <summary>

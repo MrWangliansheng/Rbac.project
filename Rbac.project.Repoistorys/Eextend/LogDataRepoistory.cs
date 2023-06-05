@@ -1,5 +1,5 @@
 ﻿using Rbac.project.Domain;
-using Rbac.project.IRepoistory.LogOperation;
+using Rbac.project.IRepoistory.Eextend;
 using Rbac.project.Repoistorys;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rbac.project.Repoistory.LogOperation
+namespace Rbac.project.Repoistory.Eextend
 {
     public class LogDataRepoistory:BaseRepoistory<LogData>,ILogDataRepoistory
     {

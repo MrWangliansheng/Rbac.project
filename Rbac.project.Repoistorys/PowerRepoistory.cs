@@ -6,7 +6,7 @@ using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.Domain.Enum;
 using Rbac.project.IRepoistory;
-using Rbac.project.IRepoistory.LogOperation;
+using Rbac.project.IRepoistory.Eextend;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -93,20 +93,33 @@ namespace Rbac.project.Repoistorys
             var tran=db.Database.BeginTransaction();
             try
             {
-                var list = db.Power.Where(m => m.PowerParentId.Equals(t.PowerParentId) & m.PowerName.Equals(t.PowerName)).ToList();
-                if (list.Count>0)
+                var list = db.Power.Where(m => m.PowerParentId.Equals(t.PowerParentId) & m.PowerName.Equals(t.PowerName)).FirstOrDefault();
+                if (list!=null)
                 {
-                    t.PowerId = -1;
+                    var power = mapper.Map(t,list);
+                    db.Update(power);
+                    db.SaveChanges();
+                    logdata.CreateLog("/PowerRepoistory/Update", "修改菜单信息", "");
+                    tran.Commit();
                     return t;
                 }
                 else
                 {
-                    var power= mapper.Map<Power>(t);
-                    db.Update(power);
-                    db.SaveChanges();
-                    logdata.CreateLog("/PowerRepoistory/Update","修改菜单信息","");
-                    tran.Commit();
-                    return t;
+                    list = db.Power.Where(m => m.PowerName.Equals(t.PowerName)).FirstOrDefault();
+                    if (list != null)
+                    {
+                        t.PowerId = -1;
+                        return t;
+                    }
+                    else
+                    {
+                        var power = mapper.Map<Power>(t);
+                        db.Update(power);
+                        db.SaveChanges();
+                        logdata.CreateLog("/PowerRepoistory/Update", "修改菜单信息", "");
+                        tran.Commit();
+                        return t;
+                    }
                 }
             }
             catch (Exception ex)
@@ -115,6 +128,27 @@ namespace Rbac.project.Repoistorys
                 logdata.CreateLog("/PowerRepoistory/Update", ex.Message, "");
                 return null;
             }
+        }
+        /// <summary>
+        /// 逻辑删除菜单信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public override async Task<PowerData> LogicDeleteAsync(int id)
+        {
+            try
+            {
+                var power = await db.Power.FindAsync(id);
+                power.PowerIsDelete = true;
+                logdata.CreateLog("/PowerRepoistory/LogicDeleteAsync", "删除菜单信息", "");
+                return mapper.Map<PowerData>(power);
+            }
+            catch (Exception ex)
+            {
+                logdata.CreateLog("/PowerRepoistory/LogicDeleteAsync", ex.Message, "");
+                return null;
+            }
+           
         }
         #endregion
 

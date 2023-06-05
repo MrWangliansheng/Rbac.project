@@ -19,8 +19,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using CSRedis;
-using Rbac.project.IRepoistory.LogOperation;
-using Rbac.project.Repoistory.LogOperation;
 using Rbac.project.Domain.Dto;
 using Rbac.project.Domain.DataDisplay;
 using Microsoft.IdentityModel.Tokens;
@@ -30,6 +28,11 @@ using System.ComponentModel;
 using Lazy.Captcha.Core.Generator;
 using SkiaSharp;
 using Lazy.Captcha.Core;
+using Rbac.project.IRepoistory.Eextend;
+using Rbac.project.Repoistory.Eextend;
+using Rbac.project.Repoistorys.Eextend;
+using Rbac.project.IService.Eextend;
+using Rbac.project.Service.Eextend;
 
 namespace Rbac.project.WebAPI
 {
@@ -84,7 +87,7 @@ namespace Rbac.project.WebAPI
                 option.IgnoreCase = true; // 比较时是否忽略大小写
                 option.StoreageKeyPrefix = ""; // 存储键前缀
 
-                option.ImageOption.Animation = true; // 是否启用动画
+                option.ImageOption.Animation = false; // 是否启用动画
                 option.ImageOption.FrameDelay = 1000; // 每帧延迟,Animation=true时有效, 默认30
 
                 option.ImageOption.Width = 150; // 验证码宽度
@@ -148,8 +151,8 @@ namespace Rbac.project.WebAPI
                 .AllowAnyMethod()
                 .WithExposedHeaders("X-Pagination"));
             });
-
-
+            //注入上下文
+            services.AddHttpContextAccessor();
 
             services.AddDbContext<RbacDbContext>(m => m.UseSqlServer(Configuration.GetConnectionString("ConStr"), m => m.MigrationsAssembly("Rbac.project.WebAPI")));
 
@@ -157,7 +160,9 @@ namespace Rbac.project.WebAPI
 
             services.AddScoped(typeof(IBaseRepoistory<>), typeof(BaseRepoistory<>));
             services.AddScoped(typeof(IBaseService<ResultDtoData, UserData>), typeof(BaseService<ResultDtoData, UserData>));
-
+            services.AddScoped(typeof(IReflectRepoistory<>), typeof(ReflectRepoistory<>));
+            services.AddScoped(typeof(IReflectService<>), typeof(ReflectService<>));
+            services.AddScoped<IGetHeaderToken, GetHeaderToken>();
 
             services.AddScoped<IUserService, UserService>();
 

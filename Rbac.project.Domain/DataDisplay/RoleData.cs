@@ -16,7 +16,6 @@ namespace Rbac.project.Domain.DataDisplay
         /// <summary>
         /// 角色名称
         /// </summary>
-        [StringLength(50)]
         public string? RoleName { get; set; }
         /// <summary>
         ///角色上级ID 

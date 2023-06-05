@@ -12,5 +12,7 @@ namespace Rbac.project.IRepoistory
     public interface IRoleRepoistory:IBaseRepoistory<RoleData>
     {
         ResultDtoData GetRoleTree(int id=0);
+
+        ResultDto GetRoleName(int id,string name);
     }
 }

@@ -165,6 +165,7 @@ namespace Rbac.project.Service
                             new Claim(JwtClaimTypes.Id,user.UserId.ToString()),
                             new Claim(JwtClaimTypes.Name,user.UserName.ToString()),
                             new Claim(JwtClaimTypes.Email,user.UserEmail.ToString()),
+                            new Claim(JwtClaimTypes.Profile,user.UserImg),
                         };
                         SecurityToken token = new JwtSecurityToken(issuer: "issuer", audience: "audience", signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
                             expires: DateTime.Now.AddSeconds(10),
@@ -173,7 +174,7 @@ namespace Rbac.project.Service
                     }
                     else
                     {
-                        return new ResultDto { Result = Result.Success, Message = "登录失败用户名或密码错误" };
+                        return new ResultDto { Result = Result.Warning, Message = "登录失败用户名或密码错误" };
                     }
                 }
                 else
@@ -201,7 +202,7 @@ namespace Rbac.project.Service
                 var user = await Idal.InsertAsync(data);
                 if (user != null)
                 {
-                    return new ResultDtoData { Result = Result.Success, Message = "添加用户成功" };
+                    return new ResultDtoData { Result = Result.Success, Message = "添加用户成功" ,Data=mapper.Map<User>(user)};
                 }
                 else
                 {
@@ -232,6 +233,23 @@ namespace Rbac.project.Service
                 return new ResultDtoData { Result = Result.Error };
             }
            
+        }
+        /// <summary>
+        /// 逻辑删除用户信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public override async Task<ResultDtoData> LogicDeleteAsync(int id)
+        {
+            var user=await dal.LogicDeleteAsync(id);
+            if (user != null)
+            {
+                return new ResultDtoData { Result = Result.Success, Message = "删除成功", Data = mapper.Map<User>(user) };
+            }
+            else
+            {
+                return new ResultDtoData { Result = Result.Error, Message = "删除失败"};
+            }
         }
     }
 }

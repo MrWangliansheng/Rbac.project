@@ -14,5 +14,7 @@ namespace Rbac.project.IService
         ResultDtoData GetRoleTree();
 
         Task<PageDto> GetRolePage(RoleDto dto);
+
+        ResultDto GetRoleName(int id, string name);
     }
 }

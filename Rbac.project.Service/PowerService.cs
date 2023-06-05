@@ -5,6 +5,7 @@ using Rbac.project.Domain.Dto;
 using Rbac.project.IRepoistory;
 using Rbac.project.IService;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
@@ -22,7 +23,7 @@ namespace Rbac.project.Service
             this.dal = dal;
             this.mapper = mapper;
         }
-
+        
         public ResultDtoData GetPowerEnum()
         {
             return dal.GetPowerEnum();
@@ -85,31 +86,32 @@ namespace Rbac.project.Service
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        List<int> ids = new List<int>();
         public async Task<ResultDtoData> GetPar(int id)
         {
             var parlist = await dal.GetALL();
             List<int> ints = new List<int>();
-            ints.Add(id);
+            ids.Add(id);
             foreach (var item in parlist.Where(m => m.PowerId.Equals(id)))
             {
                 if (item.PowerParentId != 0)
-                    ints.Add(GetPars(parlist, item.PowerParentId));
+                    ints=GetPars(parlist, item.PowerParentId);
             }
-            ints.Reverse();
+            ids.Reverse();
 
-            return new ResultDtoData { Result = Result.Success, Data = ints };
+            return new ResultDtoData { Result = Result.Success, Data = ids };
         }
-        public int GetPars(List<PowerData> data, int id)
+        public List<int> GetPars(List<PowerData> data, int id)
         {
-            int ids = 0;
+
             foreach (var item in data.Where(m => m.PowerId.Equals(id)))
             {
-                //ids.Add(item.PowerId);
+                ids.Add(item.PowerId);
 
-                ids = GetPars(data, item.PowerParentId);
+                 GetPars(data, item.PowerParentId);
 
             }
-            return ids == 0 ? id : ids;
+            return ids;
         }
         /// <summary>
         /// 菜单信息回显
@@ -146,6 +148,19 @@ namespace Rbac.project.Service
             else
             {
                 return new ResultDtoData { Result = Result.Success, Message = "修改成功" };
+            }
+        }
+
+        public override async Task<ResultDtoData> LogicDeleteAsync(int id)
+        {
+            var data = await dal.LogicDeleteAsync(id);
+            if (data==null)
+            {
+                return new ResultDtoData { Result = Result.Success, Message = "删除成功" };
+            }
+            else
+            {
+                return new ResultDtoData { Result = Result.Error, Message = "删除信息异常请重试或联系管理员" };
             }
         }
         #endregion

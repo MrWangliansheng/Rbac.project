@@ -3,15 +3,22 @@ using CSRedis;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using NPOI.HSSF.Record.Chart;
 using Rbac.project.Domain;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.IService;
+using Rbac.project.IService.Eextend;
+using Rbac.project.Service.Eextend;
 using Rbac.project.Utility;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
+using static NPOI.HSSF.Util.HSSFColor;
 
 namespace Rbac.project.WebAPI.Controllers
 {
@@ -128,15 +135,8 @@ namespace Rbac.project.WebAPI.Controllers
         [HttpDelete("LogicDeleteAsyncUser")]
         public async Task<IActionResult> LogicDeleteAsyncUser(int id)
         {
-            var user =  mapper.Map<User>(await bll.LogicDeleteAsync(id));
-            if (user.UserIsDelete)
-            {
-                return Ok(new ResultDto { Result = Result.Success, Message = "删除成功" });
-            }
-            else
-            {
-                return Ok(new ResultDto { Result = Result.Success, Message = "删除失败" });
-            }
+            var data = await bll.LogicDeleteAsync(id);
+            return Ok(data);
         }
         /// <summary>
         /// 查询是否重复名称
@@ -166,6 +166,51 @@ namespace Rbac.project.WebAPI.Controllers
         public ResultDtoData GetNewToken(string token)
         {
             return bll.GetNewToken(token);
+        }
+
+        /// <summary>
+        /// 导出数据
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("Export")]
+        public IActionResult Export(List<User> list)
+        {
+            var ex=list.ListToExcelPack();
+            return File(ex, "application/ms-excel", "用户信息.xlsx");
+        }
+        /// <summary>
+        /// 导入数据
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        [HttpPost("Import")]
+        [AllowAnonymous]
+        public IActionResult Import(IFormFile file)
+        {
+            var exname=Path.GetExtension(file.FileName);
+            if (exname.ToLower()!=".xlsx"&&exname.ToLower()!=".xls")
+            {
+                return Ok(new ResultDto { Result = Result.Warning, Message = "格式有误" });
+            }
+            else
+            {
+                var guid = Guid.NewGuid()+exname;
+                var path=Directory.GetCurrentDirectory()+"/wwwroot/Excel/";
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                using (Stream stream=new FileStream(path + guid, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                    var list= stream.ExcelToListPack<User>(file.FileName);
+
+                    
+                    stream.Flush();
+                }
+                return null;
+            }
         }
     }
 }

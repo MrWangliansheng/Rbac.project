@@ -3,7 +3,7 @@ using Rbac.project.Domain;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.IRepoistory;
-using Rbac.project.IRepoistory.LogOperation;
+using Rbac.project.IRepoistory.Eextend;
 using Rbac.project.IService;
 using System;
 using System.Collections.Generic;
@@ -46,13 +46,13 @@ namespace Rbac.project.Service
                 list = list.Skip((dto.pageindex - 1) * dto.pagesize).Take(dto.pagesize).ToList();
                 logdata.CreateLog("/RoleRepoistory/GetRolePage", "查询角色信息", "");
 
-                return new PageDto { Result=Result.Success,Data=list,pagecount=dto.pagecount,total=dto.total};
-                
+                return new PageDto { Result = Result.Success, Data = list, pagecount = dto.pagecount, total = dto.total };
+
             }
             catch (Exception ex)
             {
-                logdata.CreateLog("/RoleRepoistory/GetRolePage", "查询角色信息:"+ex.Message, "");
-                return new PageDto { Result = Result.Error,Message=ex.Message};
+                logdata.CreateLog("/RoleRepoistory/GetRolePage", "查询角色信息:" + ex.Message, "");
+                return new PageDto { Result = Result.Error, Message = ex.Message };
             }
         }
         /// <summary>
@@ -80,12 +80,12 @@ namespace Rbac.project.Service
         /// <returns></returns>
         public override async Task<ResultDtoData> InsertAsync(RoleData t)
         {
-            var role=await Idal.InsertAsync(t);
-            if (role==null)
+            var role = await Idal.InsertAsync(t);
+            if (role == null)
             {
                 return new ResultDtoData { Result = Result.Error, Message = "添加角色异常详情请联系管理员" };
             }
-            else if(role.RoleId>0)
+            else if (role.RoleId > 0)
             {
                 return new ResultDtoData { Result = Result.Success, Message = "添加角色成功" };
             }
@@ -93,6 +93,50 @@ namespace Rbac.project.Service
             {
                 return new ResultDtoData { Result = Result.Warning, Message = "角色已重复" };
             }
+        }
+        /// <summary>
+        /// 反填角色信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public override async Task<ResultDtoData> FindAsync(int id)
+        {
+            var role = await dal.FindAsync(id);
+
+            if (role != null)
+            {
+                return new ResultDtoData { Result = Result.Success, Message = "反填信息成功" ,Data=role};
+            }
+            else
+            {
+                return new ResultDtoData { Result = Result.Error, Message = "反填信息失败" };
+            }
+        }
+        /// <summary>
+        /// 修改用户角色信息
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public override ResultDtoData Update(RoleData t)
+        {
+            var role = dal.Update(t);
+            if (role == null)
+            {
+                return new ResultDtoData { Result = Result.Error, Message = "修改信息异常请重新操作或联系管理员" };
+            }
+            else if (role.RoleId == -1)
+            {
+                return new ResultDtoData { Result = Result.Warning, Message = "该角色已存在无法修改" };
+            }
+            else
+            {
+                return new ResultDtoData { Result = Result.Success, Message = "修改成功" };
+            }
+        }
+
+        public ResultDto GetRoleName(int id, string name)
+        {
+            return dal.GetRoleName(id, name);
         }
     }
 }
