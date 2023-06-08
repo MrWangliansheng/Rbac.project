@@ -22,5 +22,7 @@ namespace Rbac.project.IRepoistory
 
         Task<PageDto> GetUserInfoPage(UserDto dto);
 
+        List<int> GetRoleId(int id);
+
     }
 }

@@ -81,13 +81,13 @@ namespace Rbac.project.WebAPI
             // 全部配置
             services.AddCaptcha(Configuration, option =>
             {
-                option.CaptchaType = CaptchaType.WORD; // 验证码类型
+                option.CaptchaType = CaptchaType.WORD_NUMBER_UPPER; // 验证码类型
                 option.CodeLength = 4; // 验证码长度, 要放在CaptchaType设置后.  当类型为算术表达式时，长度代表操作的个数
                 option.ExpirySeconds = 30; // 验证码过期时间
                 option.IgnoreCase = true; // 比较时是否忽略大小写
                 option.StoreageKeyPrefix = ""; // 存储键前缀
 
-                option.ImageOption.Animation = false; // 是否启用动画
+                option.ImageOption.Animation = true; // 是否启用动画
                 option.ImageOption.FrameDelay = 1000; // 每帧延迟,Animation=true时有效, 默认30
 
                 option.ImageOption.Width = 150; // 验证码宽度

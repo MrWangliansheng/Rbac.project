@@ -18,6 +18,10 @@ using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using IdentityModel;
+using Rbac.project.Domain.ParentIdAll;
+using AutoMapper.Internal;
+using MathNet.Numerics;
+
 namespace Rbac.project.Service
 {
     public class UserService : BaseService<UserData, ResultDtoData>, IUserService
@@ -160,12 +164,14 @@ namespace Rbac.project.Service
                             }
                         }
                         //生成Token
+                        var roleid = dal.GetRoleId(user.UserId).ToList();
                         SecurityKey key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["Kestrel:key"]));
                         IList<Claim> claims = new List<Claim> {
                             new Claim(JwtClaimTypes.Id,user.UserId.ToString()),
                             new Claim(JwtClaimTypes.Name,user.UserName.ToString()),
                             new Claim(JwtClaimTypes.Email,user.UserEmail.ToString()),
                             new Claim(JwtClaimTypes.Profile,user.UserImg),
+                            new Claim(JwtClaimTypes.Role,string.Concat(roleid)),
                         };
                         SecurityToken token = new JwtSecurityToken(issuer: "issuer", audience: "audience", signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
                             expires: DateTime.Now.AddSeconds(10),

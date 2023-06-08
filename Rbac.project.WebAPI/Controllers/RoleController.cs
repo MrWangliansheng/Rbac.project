@@ -6,7 +6,9 @@ using Rbac.project.Domain;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.IService;
+using Rbac.project.WebAPI.Filter;
 using System.Diagnostics.Eventing.Reader;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -14,7 +16,7 @@ namespace Rbac.project.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [TypeFilter(typeof(AuthorizeFilter))]
     public class RoleController : ControllerBase
     {
         public readonly CSRedisClient cs;
@@ -96,16 +98,26 @@ namespace Rbac.project.WebAPI.Controllers
             return result;
         }
         /// <summary>
-        /// 查询角色名称是否重复
+        /// 查询登录角色的权限按钮
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="name"></param>
+        /// <param name="state"></param>
         /// <returns></returns>
-        [HttpGet("GetRoleName")]
-        public ResultDto GetRoleName(int id,string name)
+        [AllowAnonymous]
+        [HttpGet("GetRolePowerButton")]
+        public ResultDto GetRolePowerButton(int id, int state)
         {
-            var dto=bll.GetRoleName(id,name);
+            var dto=bll.GetRolePowerButton(id, state);
             return dto;
+        }
+        /// <summary>
+        /// 查询用户菜单信息
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("GetRolePower")]
+        public ResultDtoData GetRolePower()
+        {
+            return bll.GetRolePower();
         }
     }
 }

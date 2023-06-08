@@ -50,7 +50,7 @@ namespace Rbac.project.WebAPI.Controllers
             return bll.GetPowerEnum();
         }
         /// <summary>
-        /// 权限菜单级联绑定
+        /// 权限菜单级联添加
         /// </summary>
         /// <returns></returns>
         [HttpPost("CreatePower")]

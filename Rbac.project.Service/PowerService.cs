@@ -154,7 +154,7 @@ namespace Rbac.project.Service
         public override async Task<ResultDtoData> LogicDeleteAsync(int id)
         {
             var data = await dal.LogicDeleteAsync(id);
-            if (data==null)
+            if (data!=null)
             {
                 return new ResultDtoData { Result = Result.Success, Message = "删除成功" };
             }

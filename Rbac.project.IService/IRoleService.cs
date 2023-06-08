@@ -15,6 +15,8 @@ namespace Rbac.project.IService
 
         Task<PageDto> GetRolePage(RoleDto dto);
 
-        ResultDto GetRoleName(int id, string name);
+        ResultDtoData GetRolePowerButton(int id,int state);
+
+        ResultDtoData GetRolePower();
     }
 }

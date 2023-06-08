@@ -134,9 +134,14 @@ namespace Rbac.project.Service
             }
         }
 
-        public ResultDto GetRoleName(int id, string name)
+        public ResultDtoData GetRolePowerButton(int id, int state)
         {
-            return dal.GetRoleName(id, name);
+            return dal.GetRolePowerButton(id,state);
+        }
+
+        public ResultDtoData GetRolePower()
+        {
+           return dal.GetRolePower();
         }
     }
 }

@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using NPOI.POIFS.Crypt.Dsig;
 using Rbac.project.Domain;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
+using Rbac.project.Domain.Enum;
 using Rbac.project.Domain.ParentIdAll;
 using Rbac.project.IRepoistory;
 using Rbac.project.IRepoistory.Eextend;
@@ -12,6 +14,7 @@ using Rbac.project.Repoistory.Eextend;
 using Rbac.project.Repoistorys.AutoMapper;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -27,7 +30,7 @@ namespace Rbac.project.Repoistorys
         private readonly IMapper mapper;
         private readonly IReflectRepoistory<Role> reflect;
         private readonly IHttpContextAccessor http;
-        public RoleRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper, IReflectRepoistory<Role> reflect,IHttpContextAccessor http) : base(db)
+        public RoleRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper, IReflectRepoistory<Role> reflect, IHttpContextAccessor http) : base(db)
         {
             this.db = db;
             this.logdata = logdata;
@@ -195,19 +198,20 @@ namespace Rbac.project.Repoistorys
             try
             {
                 var role = await db.Role.FindAsync(id);
-                List<int> paridall=new List<int>();
-                var paridlist=db.RolePower.Where(m=>m.RoleID==id).ToList();
+                List<int> paridall = new List<int>();
+                var paridlist = db.RolePower.Where(m => m.RoleID == id).ToList();
                 foreach (var item in paridlist)
                 {
                     paridall.Add(item.PowerID);
                 }
-                var idalllist=db.RolePowerIdAll.Where(m=>m.RoleID == id).ToList();
+                var idalllist = db.RolePowerIdAll.Where(m => m.RoleID == id).ToList();
                 List<string> powidall = new List<string>();
                 foreach (var item in idalllist)
                 {
                     powidall.Add(item.PowerIdAll);
                 }
-                var data= mapper.Map<RoleData>(role);
+                var data = mapper.Map<RoleData>(role);
+                data.PowerId = paridall;
                 data.PowerIdAll = powidall;
                 return data;
             }
@@ -216,7 +220,7 @@ namespace Rbac.project.Repoistorys
                 logdata.CreateLog("/RoleRepoistory/FindAsync", ex.Message, name);
                 return null;
             }
-           
+
         }
         /// <summary>
         /// 修改角色信息
@@ -225,20 +229,20 @@ namespace Rbac.project.Repoistorys
         /// <returns></returns>
         public override RoleData Update(RoleData t)
         {
-            var tran=db.Database.BeginTransaction();
+            var tran = db.Database.BeginTransaction();
             string name = http.HttpContext.User.Claims.Where(m => m.Type == "name").FirstOrDefault().Value;
             try
             {
                 var role = db.Role.Where(m => m.RoleId.Equals(t.RoleId) && m.RoleName.Equals(t.RoleName)).FirstOrDefault();
                 if (role != null)
                 {
-                    mapper.Map(t,role);
+                    mapper.Map(t, role);
                     db.Update(role);
                     db.SaveChanges();
                     var powerlist = db.RolePower.Where(m => m.RoleID.Equals(t.RoleId)).ToList();
                     var poweridall = db.RolePowerIdAll.Where(m => m.RoleID.Equals(t.RoleId)).ToList();
                     db.RemoveRange(powerlist);
-                    db.RemoveRange( poweridall);
+                    db.RemoveRange(poweridall);
 
                     foreach (var item in t.PowerIdAll)
                     {
@@ -262,8 +266,8 @@ namespace Rbac.project.Repoistorys
                 }
                 else
                 {
-                    role = db.Role.Where(m=>m.RoleParentId.Equals(t.RoleParentId)&&m.RoleName.Equals(t.RoleName)).FirstOrDefault();
-                    if (role!=null)
+                    role = db.Role.Where(m => m.RoleParentId.Equals(t.RoleParentId) && m.RoleName.Equals(t.RoleName)).FirstOrDefault();
+                    if (role != null)
                     {
                         role.RoleId = -1;
                         return mapper.Map(role, t);
@@ -313,24 +317,93 @@ namespace Rbac.project.Repoistorys
         /// <param name="id"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public ResultDto GetRoleName(int id, string name)
+        public ResultDtoData GetRolePowerButton(int id, int state)
         {
-            var role = db.Role.Where(m => m.RoleParentId.Equals(id) && m.RoleName.Equals(name)).ToList().FirstOrDefault();
-            if (role!=null)
+            #region 注释
+            //var role = db.Role.Where(m => m.RoleParentId.Equals(id) && m.RoleName.Equals(name)).ToList().FirstOrDefault();
+            //if (role != null)
+            //{
+            //    return new ResultDto { Result = Result.Success };
+            //}
+            //else
+            //{
+            //    role = db.Role.Where(m => m.RoleName.Equals(name)).FirstOrDefault();
+            //    if (role != null)
+            //    {
+            //        return new ResultDto { Result = Result.Warning, Message = "角色已存在" };
+            //    }
+            //    else
+            //    {
+            //        return new ResultDto { Result = Result.Success };
+            //    }
+            //}
+            #endregion
+            var list = (from use in db.User
+                        join userol in db.UserRole on use.UserId equals userol.UserID
+                        join rol in db.Role on userol.RoleID equals rol.RoleId
+                        join rolpow in db.RolePower on rol.RoleId equals rolpow.RoleID
+                        join pow in db.Power on rolpow.PowerID equals pow.PowerId
+                        where use.UserId.Equals(id)
+                        select  new {
+                            pow.PowerName,
+                            PowerType=(int)pow.PowerType,
+                            pow.PowerRoute,
+                            pow.RouteName,
+                            pow.PowerAPIUrl,
+                            pow.PowerIcon
+                        });
+            if(state>0)
             {
-                return new ResultDto { Result = Result.Success };
+                list = list.Where(m => m.PowerType.Equals(state));
             }
-            else
+            return new ResultDtoData { Result = Result.Success, Data = list.ToList() };
+        }
+        /// <summary>
+        /// 查询登录用户菜单
+        /// </summary>
+        /// <returns></returns>
+        public ResultDtoData GetRolePower()
+        {
+            try
             {
-                role = db.Role.Where(m => m.RoleName.Equals(name)).FirstOrDefault();
-                if (role!=null)
+                //获取token
+                string token = http.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var handler = new JwtSecurityTokenHandler();
+                //解析token获取Payload对象数据
+                var payload = handler.ReadJwtToken(token).Payload;
+                //获取Claim中存储的用户数据
+                var roleid = payload.Claims.Where(m => m.Type == "role").FirstOrDefault().Value.Split(",").Select(m => Convert.ToInt32(m)).ToList();
+                var poweridlist = db.RolePower.Where(m => roleid.Contains(m.RoleID)).Select(m=>m.PowerID).ToList();
+                var list = db.Power.Where(m => poweridlist.Contains(m.PowerId)).ToList();
+                var powerlist = list.Where(m => m.PowerParentId.Equals(0)).ToList();
+                foreach (var item in powerlist)
                 {
-                    return new ResultDto { Result = Result.Warning ,Message="角色已存在"};
+                    item.children = GetRolePowerTree(list, item.PowerId);
                 }
-                else
+                return new ResultDtoData { Result = Result.Success, Data = powerlist };
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public List<Power> GetRolePowerTree(List<Power> data,int id)
+        {
+            try
+            {
+                var list = data.Where(m => m.PowerParentId.Equals(id)).ToList();
+                foreach (var item in list)
                 {
-                    return new ResultDto { Result = Result.Success };
+                    item.children = GetRolePowerTree(data, item.PowerId);
                 }
+                return list;
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

@@ -13,6 +13,7 @@ namespace Rbac.project.IRepoistory
     {
         ResultDtoData GetRoleTree(int id=0);
 
-        ResultDto GetRoleName(int id,string name);
+        ResultDtoData GetRolePowerButton(int id,int state);
+        ResultDtoData GetRolePower();
     }
 }

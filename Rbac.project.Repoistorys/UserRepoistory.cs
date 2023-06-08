@@ -342,5 +342,16 @@ namespace Rbac.project.Repoistorys
                 return null;//出现异常
             }
         }
+
+        public List<int> GetRoleId(int id)
+        {
+            List<int> roleid =new List<int>();
+            var list = db.UserRole.Where(m => m.UserID.Equals(id)).AsQueryable();
+            foreach (var item in list)
+            {
+                roleid.Add(item.RoleID);
+            }
+            return roleid;
+        }
     }
 }
