@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Threading.Tasks;
-using StackExchange.Redis;
 using System.IO;
 using CSRedis;
 using Lazy.Captcha.Core;

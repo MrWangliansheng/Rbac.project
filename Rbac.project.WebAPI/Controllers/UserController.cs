@@ -19,12 +19,13 @@ using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using static NPOI.HSSF.Util.HSSFColor;
+using Rbac.project.WebAPI.Filter;
 
 namespace Rbac.project.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [TypeFilter(typeof(AuthorizeFilter))]
     public class UserController : ControllerBase
     {
         private readonly CSRedisClient cs;

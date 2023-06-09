@@ -57,7 +57,7 @@ namespace Rbac.project.WebAPI
                 {
                     //这里的参数要遵循3（必要）+2（可选）个参数的规则
                     //1、是否开启密钥认证，验证密钥
-                    ValidateIssuerSigningKey = true,//验证发行者签名密钥
+                    ValidateIssuerSigningKey = true,//验证发行者签名密钥 
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["Kestrel:Key"])),
 
                     //签证发行人

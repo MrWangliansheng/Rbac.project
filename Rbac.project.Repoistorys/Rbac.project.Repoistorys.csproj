@@ -6,9 +6,13 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="CSRedisCore" Version="3.8.670" />
+    <PackageReference Include="IdentityModel" Version="6.1.0" />
+    <PackageReference Include="Lazy.Captcha.Core" Version="2.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.17" />
     <PackageReference Include="NPOI" Version="2.6.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.111" />
   </ItemGroup>
 
   <ItemGroup>

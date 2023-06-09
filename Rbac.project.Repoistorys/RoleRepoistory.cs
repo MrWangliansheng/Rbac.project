@@ -10,16 +10,17 @@ using Rbac.project.Domain.Enum;
 using Rbac.project.Domain.ParentIdAll;
 using Rbac.project.IRepoistory;
 using Rbac.project.IRepoistory.Eextend;
-using Rbac.project.Repoistory.Eextend;
-using Rbac.project.Repoistorys.AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+using CSRedis;
+using Lazy.Captcha.Core;
+using StackExchange.Redis;
+using Newtonsoft.Json;
+using Role = Rbac.project.Domain.Role;
 
 namespace Rbac.project.Repoistorys
 {
@@ -30,13 +31,15 @@ namespace Rbac.project.Repoistorys
         private readonly IMapper mapper;
         private readonly IReflectRepoistory<Role> reflect;
         private readonly IHttpContextAccessor http;
-        public RoleRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper, IReflectRepoistory<Role> reflect, IHttpContextAccessor http) : base(db)
+        private readonly CSRedisClient csr;
+        public RoleRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper, IReflectRepoistory<Role> reflect, IHttpContextAccessor http, CSRedisClient csr) : base(db)
         {
             this.db = db;
             this.logdata = logdata;
             this.mapper = mapper;
             this.reflect = reflect;
             this.http = http;
+            this.csr = csr;
         }
         #region 角色级联选择器绑定
         /// <summary>
@@ -339,20 +342,22 @@ namespace Rbac.project.Repoistorys
             //}
             #endregion
             var list = (from use in db.User
-                        join userol in db.UserRole on use.UserId equals userol.UserID
-                        join rol in db.Role on userol.RoleID equals rol.RoleId
-                        join rolpow in db.RolePower on rol.RoleId equals rolpow.RoleID
-                        join pow in db.Power on rolpow.PowerID equals pow.PowerId
                         where use.UserId.Equals(id)
-                        select  new {
+                        join userol in db.UserRole on use.UserId equals userol.UserID
+                        //join rol in db.Role on userol.RoleID equals rol.RoleId
+                        join rolpow in db.RolePower on userol.RoleID equals rolpow.RoleID
+                        join pow in db.Power on rolpow.PowerID equals pow.PowerId
+
+                        select new
+                        {
                             pow.PowerName,
-                            PowerType=(int)pow.PowerType,
+                            PowerType = (int)pow.PowerType,
                             pow.PowerRoute,
                             pow.RouteName,
                             pow.PowerAPIUrl,
                             pow.PowerIcon
-                        });
-            if(state>0)
+                        }).Distinct();
+            if (state > 0)
             {
                 list = list.Where(m => m.PowerType.Equals(state));
             }
@@ -373,13 +378,14 @@ namespace Rbac.project.Repoistorys
                 var payload = handler.ReadJwtToken(token).Payload;
                 //获取Claim中存储的用户数据
                 var roleid = payload.Claims.Where(m => m.Type == "role").FirstOrDefault().Value.Split(",").Select(m => Convert.ToInt32(m)).ToList();
-                var poweridlist = db.RolePower.Where(m => roleid.Contains(m.RoleID)).Select(m=>m.PowerID).ToList();
+                var poweridlist = db.RolePower.Where(m => roleid.Contains(m.RoleID)).Select(m => m.PowerID).ToList();
                 var list = db.Power.Where(m => poweridlist.Contains(m.PowerId)).ToList();
                 var powerlist = list.Where(m => m.PowerParentId.Equals(0)).ToList();
                 foreach (var item in powerlist)
                 {
                     item.children = GetRolePowerTree(list, item.PowerId);
                 }
+                csr.Set(payload.Claims.Where(m => m.Type == "id").FirstOrDefault().Value,JsonConvert.SerializeObject(powerlist));
                 return new ResultDtoData { Result = Result.Success, Data = powerlist };
             }
             catch (Exception)
@@ -389,7 +395,7 @@ namespace Rbac.project.Repoistorys
             }
         }
 
-        public List<Power> GetRolePowerTree(List<Power> data,int id)
+        public List<Power> GetRolePowerTree(List<Power> data, int id)
         {
             try
             {

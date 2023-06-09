@@ -24,6 +24,10 @@ namespace Rbac.project.Domain.DataDisplay
         /// </summary>
         public string PowerRoute { get; set; }
         /// <summary>
+        /// 权限路由名称
+        /// </summary>
+        public string RouteName { get; set; }
+        /// <summary>
         /// 菜单上级ID
         /// </summary>
         public int PowerParentId { get; set; }

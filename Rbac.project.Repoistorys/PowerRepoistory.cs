@@ -1,10 +1,15 @@
 ﻿using AutoMapper;
+using IdentityModel;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.IdentityModel.JsonWebTokens;
+using NPOI.POIFS.Crypt.Dsig;
 using Rbac.project.Domain;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
 using Rbac.project.Domain.Enum;
+using Rbac.project.Domain.ParentIdAll;
 using Rbac.project.IRepoistory;
 using Rbac.project.IRepoistory.Eextend;
 using System;
@@ -13,6 +18,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -24,11 +30,17 @@ namespace Rbac.project.Repoistorys
         private readonly RbacDbContext db;
         private readonly ILogDataRepoistory logdata;
         private readonly IMapper mapper;
-        public PowerRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper) : base(db)
+        private readonly IReflectRepoistory<Power> reflect;
+        private readonly IHttpContextAccessor http;
+        string name = "";
+        public PowerRepoistory(RbacDbContext db, ILogDataRepoistory logdata, IMapper mapper, IReflectRepoistory<Power> reflect, IHttpContextAccessor http) : base(db)
         {
             this.logdata = logdata;
             this.db = db;
             this.mapper = mapper;
+            this.reflect = reflect;
+            this.http = http;
+            name = http.HttpContext.User.Claims.Where(m=>m.Type=="name").FirstOrDefault().Value;
         }
         #region 权限菜单
         /// <summary>
@@ -41,17 +53,26 @@ namespace Rbac.project.Repoistorys
             var star = await db.Database.BeginTransactionAsync();
             try
             {
-                var power = db.Power.Where(m => m.PowerParentId.Equals(t.PowerParentId) & m.PowerName.Equals(t.PowerName)).ToList(); 
-                if(power.Count>0)
+                var power = db.Power.Where(m => m.PowerParentId.Equals(t.PowerParentId) & m.PowerName.Equals(t.PowerName)).ToList();
+                if (power.Count > 0)
                 {
                     t.PowerId = -1;
                     return t;
                 }
                 var pwdata = mapper.Map<Power>(t);
                 await db.AddAsync(pwdata);
+                var rolepower = new RolePower();
+                rolepower.RoleID = 1;
+                rolepower.PowerID = pwdata.PowerId;
+                var rolepoweridall = new RolePowerIdAll();
+                rolepoweridall.RoleID = 1;
+                rolepoweridall.PowerIdAll = pwdata.PowerParentIdAll + "," + pwdata.PowerId;
+                await db.AddAsync(rolepower);
+                await db.AddAsync(rolepoweridall);
                 logdata.CreateLog("/Repoistorys/InsertAsync", "添加权限菜单成功", "");
                 await db.SaveChangesAsync();
-
+                //修改审计字段
+                reflect.CreateAudit(pwdata, name);
                 await star.CommitAsync();
                 return t;
             }
@@ -72,8 +93,8 @@ namespace Rbac.project.Repoistorys
             try
             {
                 var power = await db.Power.FindAsync(id);
-                var data= mapper.Map<PowerData>(power);
-                logdata.CreateLog("/PowerRopeistory/FindAsync","反填菜单信息","");
+                var data = mapper.Map<PowerData>(power);
+                logdata.CreateLog("/PowerRopeistory/FindAsync", "反填菜单信息", "");
                 return data;
             }
             catch (Exception ex)
@@ -81,7 +102,7 @@ namespace Rbac.project.Repoistorys
                 logdata.CreateLog("/PowerRopeistory/FindAsync", ex.Message, "");
                 return null;
             }
-            
+
         }
         /// <summary>
         /// 修改菜单信息
@@ -90,16 +111,18 @@ namespace Rbac.project.Repoistorys
         /// <returns></returns>
         public override PowerData Update(PowerData t)
         {
-            var tran=db.Database.BeginTransaction();
+            var tran = db.Database.BeginTransaction();
             try
             {
                 var list = db.Power.Where(m => m.PowerParentId.Equals(t.PowerParentId) & m.PowerName.Equals(t.PowerName)).FirstOrDefault();
-                if (list!=null)
+                if (list != null)
                 {
-                    var power = mapper.Map(t,list);
+                    var power = mapper.Map(t, list);
                     db.Update(power);
                     db.SaveChanges();
                     logdata.CreateLog("/PowerRepoistory/Update", "修改菜单信息", "");
+                    //修改审计字段
+                    reflect.UpdateAudit(power, name);
                     tran.Commit();
                     return t;
                 }
@@ -117,6 +140,8 @@ namespace Rbac.project.Repoistorys
                         db.Update(power);
                         db.SaveChanges();
                         logdata.CreateLog("/PowerRepoistory/Update", "修改菜单信息", "");
+                        //修改审计字段
+                        reflect.UpdateAudit(power, name);
                         tran.Commit();
                         return t;
                     }
@@ -141,6 +166,8 @@ namespace Rbac.project.Repoistorys
                 var power = await db.Power.FindAsync(id);
                 power.PowerIsDelete = true;
                 logdata.CreateLog("/PowerRepoistory/LogicDeleteAsync", "删除菜单信息", "");
+                //修改审计字段
+                reflect.DeleteAudit(power, name);
                 return mapper.Map<PowerData>(power);
             }
             catch (Exception ex)
@@ -148,7 +175,7 @@ namespace Rbac.project.Repoistorys
                 logdata.CreateLog("/PowerRepoistory/LogicDeleteAsync", ex.Message, "");
                 return null;
             }
-           
+
         }
         #endregion
 
@@ -162,7 +189,7 @@ namespace Rbac.project.Repoistorys
         {
             try
             {
-                var list = db.Set<Power>().Where(m => m.PowerParentId.Equals(id)).ToList();
+                var list = db.Set<Power>().Where(m => m.PowerParentId.Equals(id) && m.PowerIsDelete.Equals(false)).ToList();
                 var treelist = new List<TreeDto>();
                 foreach (var item in list)
                 {
@@ -185,7 +212,7 @@ namespace Rbac.project.Repoistorys
         {
             try
             {
-                var list = db.Set<Power>().Where(m => m.PowerParentId.Equals(id)).ToList();
+                var list = db.Set<Power>().Where(m => m.PowerParentId.Equals(id) && m.PowerIsDelete.Equals(false)).ToList();
                 var treelist = new List<TreeDto>();
                 foreach (var item in list)
                 {
@@ -236,7 +263,7 @@ namespace Rbac.project.Repoistorys
         {
             try
             {
-                var list = db.Power.Where(m => m.PowerParentId.Equals(id)).ToList();
+                var list = db.Power.Where(m => m.PowerParentId.Equals(id) && m.PowerIsDelete.Equals(false)).ToList();
                 var treelist = new List<TreeDto>();
                 foreach (var item in list)
                 {
@@ -260,7 +287,7 @@ namespace Rbac.project.Repoistorys
 
         public List<TreeDto> GetPowerTreeDataSublevel(int id)
         {
-            var list = db.Power.Where(m => m.PowerParentId.Equals(id)).ToList();
+            var list = db.Power.Where(m => m.PowerParentId.Equals(id) && m.PowerIsDelete.Equals(false)).ToList();
             var treelist = new List<TreeDto>();
             foreach (var item in list)
             {
@@ -279,7 +306,7 @@ namespace Rbac.project.Repoistorys
             var list = new List<object>();
             foreach (var item in Enum.GetValues<PowerEnum>())
             {
-                var obj = (DescriptionAttribute)item.GetType().GetField(item.ToString()).GetCustomAttributes(typeof(DescriptionAttribute),false)[0];
+                var obj = (DescriptionAttribute)item.GetType().GetField(item.ToString()).GetCustomAttributes(typeof(DescriptionAttribute), false)[0];
                 list.Add(new
                 {
                     id = item,
@@ -291,7 +318,7 @@ namespace Rbac.project.Repoistorys
 
         public override async Task<List<PowerData>> GetALL()
         {
-            var parlist =await db.Power.ToListAsync();
+            var parlist = await db.Power.Where(m => m.PowerIsDelete.Equals(false)).ToListAsync();
             return mapper.Map<List<PowerData>>(parlist);
         }
         #endregion
