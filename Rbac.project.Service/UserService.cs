@@ -6,7 +6,6 @@ using Rbac.project.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
@@ -18,9 +17,6 @@ using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using IdentityModel;
-using Rbac.project.Domain.ParentIdAll;
-using AutoMapper.Internal;
-using MathNet.Numerics;
 
 namespace Rbac.project.Service
 {

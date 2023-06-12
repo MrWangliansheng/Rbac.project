@@ -5,21 +5,14 @@ using Rbac.project.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Rbac.project.Utility;
-using System.Security.Cryptography;
 using Rbac.project.Domain.Dto;
 using AutoMapper;
 
-using Microsoft.Extensions.DependencyInjection;
-using Rbac.project.Repoistorys.AutoMapper;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.IRepoistory.Eextend;
 using Rbac.project.Domain.ParentIdAll;
 using Microsoft.AspNetCore.Http;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.Builder;
 
 namespace Rbac.project.Repoistorys
 {

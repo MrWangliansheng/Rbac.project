@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Rbac.project.Domain;
 using Rbac.project.Domain.ParentIdAll;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rbac.project.Repoistorys
 {

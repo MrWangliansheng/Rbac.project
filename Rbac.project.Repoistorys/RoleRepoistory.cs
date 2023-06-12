@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using NPOI.POIFS.Crypt.Dsig;
 using Rbac.project.Domain;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
-using Rbac.project.Domain.Enum;
 using Rbac.project.Domain.ParentIdAll;
 using Rbac.project.IRepoistory;
 using Rbac.project.IRepoistory.Eextend;
@@ -17,8 +14,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CSRedis;
-using Lazy.Captcha.Core;
-using StackExchange.Redis;
 using Newtonsoft.Json;
 using Role = Rbac.project.Domain.Role;
 

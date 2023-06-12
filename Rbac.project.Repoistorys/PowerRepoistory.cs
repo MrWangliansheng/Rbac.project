@@ -1,10 +1,6 @@
 ﻿using AutoMapper;
-using IdentityModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.IdentityModel.JsonWebTokens;
-using NPOI.POIFS.Crypt.Dsig;
 using Rbac.project.Domain;
 using Rbac.project.Domain.DataDisplay;
 using Rbac.project.Domain.Dto;
@@ -16,12 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Rbac.project.Repoistorys
 {

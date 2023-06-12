@@ -1,22 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.VisualBasic;
-using Newtonsoft.Json;
-using NPOI.Util;
-using Rbac.project.Domain;
-using Rbac.project.IRepoistory;
-using Rbac.project.IService;
 using Rbac.project.Repoistorys;
-using Rbac.project.WebAPI.Controllers;
 using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Security.Claims;
 
 namespace Rbac.project.WebAPI.Filter
@@ -82,9 +71,10 @@ namespace Rbac.project.WebAPI.Filter
 
                         //获取Claim中存储的用户数据
                         var roleid = context.HttpContext.User.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault().Value.Split(",").Select(m => Convert.ToInt32(m)).ToList();
-
+                        //查询拥有当前接口权限的角色信息
                         var list = db.RolePower.Where(m => db.Power.Where(m => m.PowerAPIUrl.Equals(teamplate.Replace("api", ""))).Select(s => s.PowerId).Contains(m.PowerID)).Select(m => m.RoleID).ToList();
                         bool state = true;
+                        //如果当前登录用户的角色不允许访问接口状态码为403
                         if (!roleid.Any(m => list.Contains(m)))
                         {
                             state = false;
